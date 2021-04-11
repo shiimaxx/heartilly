@@ -14,6 +14,11 @@ import (
 
 var logger *zap.Logger
 
+var (
+	StatusOK    = 0
+	StatusAlert = 1
+)
+
 type Config struct {
 	Target []TargetConfig
 }
@@ -23,8 +28,9 @@ type TargetConfig struct {
 }
 
 type Worker struct {
-	ID  int
-	URL string
+	ID     int
+	URL    string
+	Status int
 
 	Client *http.Client
 }
@@ -41,9 +47,17 @@ func (w *Worker) run(ctx context.Context) {
 		logger.Info("check", zap.Int("id", w.ID), zap.String("target", w.URL))
 
 		if ok, err := w.check(ctx); ok && err == nil {
-			logger.Info("ok")
+			if w.Status != StatusOK {
+				w.Status = StatusOK
+				logger.Info("recovery")
+			}
+			logger.Debug("ok")
 		} else {
-			logger.Info("failed")
+			if w.Status != StatusAlert {
+				w.Status = StatusAlert
+				logger.Info("alert")
+			}
+			logger.Debug("failed")
 		}
 
 		select {
@@ -105,6 +119,8 @@ func main() {
 		worker := &Worker{
 			ID:     id,
 			URL:    url,
+			Status: StatusOK,
+
 			Client: client,
 		}
 		go worker.run(ctx)
