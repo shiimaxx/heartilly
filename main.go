@@ -23,6 +23,7 @@ type TargetConfig struct {
 }
 
 type Worker struct {
+	ID  int
 	URL string
 
 	Client *http.Client
@@ -33,11 +34,11 @@ func (w *Worker) run(ctx context.Context) {
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
-	logger.Info("start worker", zap.String("target", w.URL))
+	logger.Info("start worker", zap.Int("id", w.ID), zap.String("target", w.URL))
 
 	c := time.Tick(1 * time.Minute)
 	for {
-		logger.Info("check", zap.String("target", w.URL))
+		logger.Info("check", zap.Int("id", w.ID), zap.String("target", w.URL))
 
 		if ok, err := w.check(ctx); ok && err == nil {
 			logger.Info("ok")
@@ -80,7 +81,7 @@ func main() {
 	logger = l
 	defer logger.Sync()
 
-	config, err := toml.LoadFile("config.toml")
+	config, err := toml.LoadFile("conf/config.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -95,11 +96,14 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	for _, url := range targetURLs {
+	for i, url := range targetURLs {
+		id := i
+
 		client := http.DefaultClient
 		client.Timeout = 10 * time.Second
 
 		worker := &Worker{
+			ID:     id,
 			URL:    url,
 			Client: client,
 		}
