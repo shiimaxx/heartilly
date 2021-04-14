@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	toml "github.com/pelletier/go-toml"
+	"github.com/slack-go/slack"
 	"go.uber.org/zap"
 )
 
@@ -33,6 +35,39 @@ type Worker struct {
 	Status int
 
 	Client *http.Client
+
+	MessageCh chan<- string
+}
+
+type AlertSender struct {
+	Notifiers []Notifier
+
+	MessageCh <-chan string
+}
+
+func (as *AlertSender) Run() error {
+	for {
+		msg := <-as.MessageCh
+		
+		for _, notifier := range as.Notifiers {
+			if err := notifier.Notify(msg); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type Notifier interface {
+	Notify(string) error
+}
+
+type Slack struct {
+	Client *slack.Client
+}
+
+func (s *Slack) Notify(msg string) error {
+	fmt.Println("notification: ", msg)
+	return nil
 }
 
 func (w *Worker) run(ctx context.Context) {
@@ -49,12 +84,14 @@ func (w *Worker) run(ctx context.Context) {
 		if ok, err := w.check(ctx); ok && err == nil {
 			if w.Status != StatusOK {
 				w.Status = StatusOK
+				w.MessageCh <- "recovery"
 				logger.Info("recovery")
 			}
 			logger.Debug("ok")
 		} else {
 			if w.Status != StatusAlert {
 				w.Status = StatusAlert
+				w.MessageCh <- "alert"
 				logger.Info("alert")
 			}
 			logger.Debug("failed")
@@ -100,6 +137,15 @@ func main() {
 		panic(err)
 	}
 
+	messageCh := make(chan string)
+	alertSender := &AlertSender{
+		Notifiers: []Notifier{
+			&Slack{Client: slack.New("")},
+		},
+		MessageCh: messageCh,
+	}
+	go alertSender.Run()
+
 	targetConfig := config.Get("target").([]*toml.Tree)
 
 	var targetURLs []string
@@ -122,6 +168,8 @@ func main() {
 			Status: StatusOK,
 
 			Client: client,
+
+			MessageCh: messageCh,
 		}
 		go worker.run(ctx)
 	}
