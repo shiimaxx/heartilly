@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -48,9 +47,10 @@ type AlertSender struct {
 func (as *AlertSender) Run() error {
 	for {
 		msg := <-as.MessageCh
-		
+
 		for _, notifier := range as.Notifiers {
 			if err := notifier.Notify(msg); err != nil {
+				logger.Error(err.Error())
 				return err
 			}
 		}
@@ -62,11 +62,18 @@ type Notifier interface {
 }
 
 type Slack struct {
-	Client *slack.Client
+	Channel string
+	Client  *slack.Client
 }
 
 func (s *Slack) Notify(msg string) error {
-	fmt.Println("notification: ", msg)
+	_, _, err := s.Client.PostMessage(
+		s.Channel,
+		slack.MsgOptionText(msg, false),
+	)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -137,10 +144,17 @@ func main() {
 		panic(err)
 	}
 
+	slackConfig := config.Get("notification.slack").(*toml.Tree)
+	slackToken := slackConfig.Get("token").(string)
+	slackChannel := slackConfig.Get("channel").(string)
+
 	messageCh := make(chan string)
 	alertSender := &AlertSender{
 		Notifiers: []Notifier{
-			&Slack{Client: slack.New("")},
+			&Slack{
+				Channel: slackChannel,
+				Client:  slack.New(slackToken),
+			},
 		},
 		MessageCh: messageCh,
 	}
