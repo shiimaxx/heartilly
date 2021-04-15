@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"time"
 
-	toml "github.com/pelletier/go-toml"
 	"github.com/slack-go/slack"
 	"go.uber.org/zap"
 )
@@ -19,14 +18,6 @@ var (
 	StatusOK    = 0
 	StatusAlert = 1
 )
-
-type Config struct {
-	Target []TargetConfig
-}
-
-type TargetConfig struct {
-	URL string
-}
 
 type Worker struct {
 	ID     int
@@ -61,12 +52,12 @@ type Notifier interface {
 	Notify(string) error
 }
 
-type Slack struct {
+type SlackNotifier struct {
 	Channel string
 	Client  *slack.Client
 }
 
-func (s *Slack) Notify(msg string) error {
+func (s *SlackNotifier) Notify(msg string) error {
 	_, _, err := s.Client.PostMessage(
 		s.Channel,
 		slack.MsgOptionText(msg, false),
@@ -139,32 +130,26 @@ func main() {
 	logger = l
 	defer logger.Sync()
 
-	config, err := toml.LoadFile("conf/config.toml")
+	config, err := LoadConfig("conf/config.toml")
 	if err != nil {
 		panic(err)
 	}
 
-	slackConfig := config.Get("notification.slack").(*toml.Tree)
-	slackToken := slackConfig.Get("token").(string)
-	slackChannel := slackConfig.Get("channel").(string)
-
 	messageCh := make(chan string)
 	alertSender := &AlertSender{
 		Notifiers: []Notifier{
-			&Slack{
-				Channel: slackChannel,
-				Client:  slack.New(slackToken),
+			&SlackNotifier{
+				Channel: config.Notification.Slack.Channel,
+				Client:  slack.New(config.Notification.Slack.Token),
 			},
 		},
 		MessageCh: messageCh,
 	}
 	go alertSender.Run()
 
-	targetConfig := config.Get("target").([]*toml.Tree)
-
 	var targetURLs []string
-	for _, tc := range targetConfig {
-		targetURLs = append(targetURLs, tc.Get("url").(string))
+	for _, t := range config.Target {
+		targetURLs = append(targetURLs, t.URL)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
