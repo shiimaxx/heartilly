@@ -9,10 +9,7 @@ import (
 	"time"
 
 	"github.com/slack-go/slack"
-	"go.uber.org/zap"
 )
-
-var logger *zap.Logger
 
 var (
 	StatusOK    = 0
@@ -27,6 +24,8 @@ type Worker struct {
 	Client *http.Client
 
 	MessageCh chan<- string
+
+	Logger *Logger
 }
 
 type AlertSender struct {
@@ -41,7 +40,6 @@ func (as *AlertSender) Run() error {
 
 		for _, notifier := range as.Notifiers {
 			if err := notifier.Notify(msg); err != nil {
-				logger.Error(err.Error())
 				return err
 			}
 		}
@@ -73,26 +71,26 @@ func (w *Worker) run(ctx context.Context) {
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
-	logger.Info("start worker", zap.Int("id", w.ID), zap.String("target", w.URL))
+	w.Logger.Info(w.ID, w.URL, "start worker")
 
 	c := time.Tick(1 * time.Minute)
 	for {
-		logger.Info("check", zap.Int("id", w.ID), zap.String("target", w.URL))
+		w.Logger.Info(w.ID, w.URL, "check")
 
 		if ok, err := w.check(ctx); ok && err == nil {
 			if w.Status != StatusOK {
 				w.Status = StatusOK
 				w.MessageCh <- "recovery"
-				logger.Info("recovery")
+				w.Logger.Info(w.ID, w.URL, "recovery")
 			}
-			logger.Debug("ok")
+			w.Logger.Debug(w.ID, w.URL, "ok")
 		} else {
 			if w.Status != StatusAlert {
 				w.Status = StatusAlert
 				w.MessageCh <- "alert"
-				logger.Info("alert")
+				w.Logger.Info(w.ID, w.URL, "alert")
 			}
-			logger.Debug("failed")
+			w.Logger.Debug(w.ID, w.URL, "failed")
 		}
 
 		select {
@@ -123,12 +121,10 @@ func (w *Worker) check(ctx context.Context) (bool, error) {
 }
 
 func main() {
-	l, err := zap.NewProduction()
+	logger, err := NewLogger()
 	if err != nil {
 		panic(err)
 	}
-	logger = l
-	defer logger.Sync()
 
 	config, err := LoadConfig("conf/config.toml")
 	if err != nil {
@@ -156,7 +152,7 @@ func main() {
 	defer stop()
 
 	for i, url := range targetURLs {
-		id := i
+		id := i+1
 
 		client := http.DefaultClient
 		client.Timeout = 10 * time.Second
@@ -169,6 +165,8 @@ func main() {
 			Client: client,
 
 			MessageCh: messageCh,
+
+			Logger: logger,
 		}
 		go worker.run(ctx)
 	}
@@ -176,6 +174,6 @@ func main() {
 	select {
 	case <-ctx.Done():
 		stop()
-		logger.Info("Interrupt")
+		logger.Info(0, "", "Interrupt")
 	}
 }
