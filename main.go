@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/slack-go/slack"
 )
 
 var (
@@ -26,44 +25,6 @@ type Worker struct {
 	MessageCh chan<- string
 
 	Logger *Logger
-}
-
-type AlertSender struct {
-	Notifiers []Notifier
-
-	MessageCh <-chan string
-}
-
-func (as *AlertSender) Run() error {
-	for {
-		msg := <-as.MessageCh
-
-		for _, notifier := range as.Notifiers {
-			if err := notifier.Notify(msg); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-type Notifier interface {
-	Notify(string) error
-}
-
-type SlackNotifier struct {
-	Channel string
-	Client  *slack.Client
-}
-
-func (s *SlackNotifier) Notify(msg string) error {
-	_, _, err := s.Client.PostMessage(
-		s.Channel,
-		slack.MsgOptionText(msg, false),
-	)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (w *Worker) run(ctx context.Context) {
@@ -133,13 +94,15 @@ func main() {
 
 	messageCh := make(chan string)
 	alertSender := &AlertSender{
-		Notifiers: []Notifier{
-			&SlackNotifier{
-				Channel: config.Notification.Slack.Channel,
-				Client:  slack.New(config.Notification.Slack.Token),
-			},
-		},
 		MessageCh: messageCh,
+	}
+	if slackConf := config.Notification.Slack; slackConf != nil {
+		token := slackConf.Token
+		channel := slackConf.Channel
+
+		alertSender.SetNotifier(
+			NewSlackNotifier(token, channel),
+		)
 	}
 	go alertSender.Run()
 
