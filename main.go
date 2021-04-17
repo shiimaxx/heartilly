@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
 )
 
 var (
@@ -93,8 +92,10 @@ func main() {
 	}
 
 	messageCh := make(chan string)
+	errCh := make(chan error)
 	alertSender := &AlertSender{
 		MessageCh: messageCh,
+		ErrCh:     errCh,
 	}
 	if slackConf := config.Notification.Slack; slackConf != nil {
 		token := slackConf.Token
@@ -115,7 +116,7 @@ func main() {
 	defer stop()
 
 	for i, url := range targetURLs {
-		id := i+1
+		id := i + 1
 
 		client := http.DefaultClient
 		client.Timeout = 10 * time.Second
@@ -134,9 +135,14 @@ func main() {
 		go worker.run(ctx)
 	}
 
-	select {
-	case <-ctx.Done():
-		stop()
-		logger.Info(0, "", "Interrupt")
+	for {
+		select {
+		case err := <-errCh:
+			logger.Error(0, "", err.Error())
+		case <-ctx.Done():
+			stop()
+			logger.Info(0, "", "Interrupt")
+			return
+		}
 	}
 }

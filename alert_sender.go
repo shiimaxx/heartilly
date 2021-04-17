@@ -4,6 +4,7 @@ type AlertSender struct {
 	Notifiers []Notifier
 
 	MessageCh <-chan string
+	ErrCh chan<- error
 }
 
 func (as *AlertSender) SetNotifier(n Notifier) {
@@ -16,7 +17,7 @@ func (as *AlertSender) Run() error {
 
 		for _, notifier := range as.Notifiers {
 			if err := notifier.Notify(msg); err != nil {
-				return err
+				as.ErrCh <- err
 			}
 		}
 	}
