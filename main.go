@@ -59,6 +59,7 @@ func (w *Worker) run(ctx context.Context) {
 			}
 		} else {
 			if !w.Status.Is(Unknown) {
+				w.Status.Unknown()
 				w.MessageCh <- Message{
 					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
 					StatusType: Unknown,
