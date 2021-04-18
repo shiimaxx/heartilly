@@ -29,6 +29,7 @@ type Worker struct {
 
 func (w *Worker) run(ctx context.Context) {
 	// jitter
+	rand.Seed(time.Now().UnixNano())
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
