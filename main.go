@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
@@ -9,15 +10,10 @@ import (
 	"time"
 )
 
-var (
-	StatusOK    = 0
-	StatusAlert = 1
-)
-
 type Worker struct {
 	ID     int
 	URL    string
-	Status int
+	Status Status
 
 	Client *http.Client
 
@@ -38,19 +34,17 @@ func (w *Worker) run(ctx context.Context) {
 		w.Logger.Info(w.ID, w.URL, "check")
 
 		if ok, err := w.check(ctx); ok && err == nil {
-			if w.Status != StatusOK {
-				w.Status = StatusOK
+			if w.Status != OK {
+				w.Status.Recovery()
 				w.MessageCh <- "recovery"
-				w.Logger.Info(w.ID, w.URL, "recovery")
+				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
-			w.Logger.Debug(w.ID, w.URL, "ok")
 		} else {
-			if w.Status != StatusAlert {
-				w.Status = StatusAlert
+			if w.Status != ALERT {
+				w.Status.Trigger()
 				w.MessageCh <- "alert"
-				w.Logger.Info(w.ID, w.URL, "alert")
+				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
-			w.Logger.Debug(w.ID, w.URL, "failed")
 		}
 
 		select {
@@ -124,7 +118,7 @@ func main() {
 		worker := &Worker{
 			ID:     id,
 			URL:    url,
-			Status: StatusOK,
+			Status: OK,
 
 			Client: client,
 
