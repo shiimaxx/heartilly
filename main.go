@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -82,6 +83,9 @@ func (w *Worker) check(ctx context.Context) (bool, error) {
 
 	resp, err := w.Client.Do(req)
 	if err != nil {
+		if err, ok := err.(net.Error); ok && err.Timeout() {
+			return false, nil
+		}
 		return false, err
 	}
 	defer resp.Body.Close()
@@ -132,7 +136,7 @@ func main() {
 		id := i + 1
 
 		client := http.DefaultClient
-		client.Timeout = 10 * time.Second
+		client.Timeout = 15 * time.Second
 
 		worker := &Worker{
 			ID:     id,
