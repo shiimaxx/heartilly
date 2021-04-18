@@ -3,8 +3,8 @@ package main
 type AlertSender struct {
 	Notifiers []Notifier
 
-	MessageCh <-chan string
-	ErrCh chan<- error
+	MessageCh <-chan Message
+	ErrCh     chan<- error
 }
 
 func (as *AlertSender) SetNotifier(n Notifier) {
@@ -22,4 +22,3 @@ func (as *AlertSender) Run() error {
 		}
 	}
 }
-

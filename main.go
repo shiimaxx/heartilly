@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+type Message struct {
+	Text       string
+	StatusType Status
+}
+
 type Worker struct {
 	ID     int
 	URL    string
@@ -17,7 +22,7 @@ type Worker struct {
 
 	Client *http.Client
 
-	MessageCh chan<- string
+	MessageCh chan<- Message
 
 	Logger *Logger
 }
@@ -36,13 +41,19 @@ func (w *Worker) run(ctx context.Context) {
 		if ok, err := w.check(ctx); ok && err == nil {
 			if w.Status != OK {
 				w.Status.Recovery()
-				w.MessageCh <- "recovery"
+				w.MessageCh <- Message{
+					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
+					StatusType: OK,
+				}
 				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
 		} else {
 			if w.Status != ALERT {
 				w.Status.Trigger()
-				w.MessageCh <- "alert"
+				w.MessageCh <- Message{
+					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
+					StatusType: ALERT,
+				}
 				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
 		}
@@ -85,7 +96,7 @@ func main() {
 		panic(err)
 	}
 
-	messageCh := make(chan string)
+	messageCh := make(chan Message)
 	errCh := make(chan error)
 	alertSender := &AlertSender{
 		MessageCh: messageCh,
