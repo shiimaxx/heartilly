@@ -16,9 +16,9 @@ type Message struct {
 }
 
 type Worker struct {
-	ID     int
-	URL    string
-	Status Status
+	ID         int
+	URL        string
+	Status     Status
 
 	Client *http.Client
 
@@ -38,21 +38,28 @@ func (w *Worker) run(ctx context.Context) {
 	for {
 		w.Logger.Info(w.ID, w.URL, "check")
 
-		if ok, err := w.check(ctx); ok && err == nil {
-			if w.Status != OK {
+		ok, err := w.check(ctx)
+		if err == nil {
+			if ok && (!w.Status.Is(Initial) && !w.Status.Is(OK)) {
 				w.Status.Recovery()
 				w.MessageCh <- Message{
 					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
 					StatusType: OK,
 				}
 				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
-			}
-		} else {
-			if w.Status != ALERT {
+			} else if !ok && (w.Status.Is(Initial) || w.Status.Is(OK)) {
 				w.Status.Trigger()
 				w.MessageCh <- Message{
 					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
-					StatusType: ALERT,
+					StatusType: Alert,
+				}
+				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
+			}
+		} else {
+			if !w.Status.Is(Unknown) {
+				w.MessageCh <- Message{
+					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
+					StatusType: Unknown,
 				}
 				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
@@ -129,7 +136,7 @@ func main() {
 		worker := &Worker{
 			ID:     id,
 			URL:    url,
-			Status: OK,
+			Status: Initial,
 
 			Client: client,
 
