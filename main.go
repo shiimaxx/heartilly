@@ -108,17 +108,20 @@ func main() {
 	var opts Options
 	parser := flags.NewParser(&opts, flags.Default)
 	if _, err := parser.Parse(); err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 
 	logger, err := NewLogger()
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 
 	config, err := LoadConfig(opts.Config)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 
 	messageCh := make(chan Message)
@@ -172,7 +175,7 @@ func main() {
 		case <-ctx.Done():
 			stop()
 			logger.Info(0, "", "Interrupt")
-			return
+			os.Exit(0)
 		}
 	}
 }
