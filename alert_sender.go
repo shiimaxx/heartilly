@@ -11,7 +11,7 @@ func (as *AlertSender) SetNotifier(n Notifier) {
 	as.Notifiers = append(as.Notifiers, n)
 }
 
-func (as *AlertSender) Run() error {
+func (as *AlertSender) Run() {
 	for {
 		msg := <-as.MessageCh
 
