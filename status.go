@@ -11,6 +11,8 @@ const (
 
 func (s *Status) String() string {
 	switch {
+	case *s == Initial:
+		return "Initial"
 	case *s == OK:
 		return "OK"
 	case *s == Alert:
