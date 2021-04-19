@@ -1,0 +1,12 @@
+[notification.slack]
+token = "token"
+channel = "#general"
+
+[[target]]
+url = "http://localhost:8080/"
+
+[[target]]
+url = "http://localhost:8080/ok"
+
+[[target]]
+url = "http://localhost:8080/error"
