@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/jessevdk/go-flags"
 )
 
 type Message struct {
@@ -98,13 +100,23 @@ func (w *Worker) check(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
+type Options struct {
+	Config string `short:"c" long:"config" default:"config.toml" description:"configuration file"`
+}
+
 func main() {
+	var opts Options
+	parser := flags.NewParser(&opts, flags.Default)
+	if _, err := parser.Parse(); err != nil {
+		panic(err)
+	}
+
 	logger, err := NewLogger()
 	if err != nil {
 		panic(err)
 	}
 
-	config, err := LoadConfig("conf/config.toml")
+	config, err := LoadConfig(opts.Config)
 	if err != nil {
 		panic(err)
 	}

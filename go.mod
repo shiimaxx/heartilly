@@ -3,6 +3,7 @@ module github.com/shiimaxx/heartilly
 go 1.16
 
 require (
+	github.com/jessevdk/go-flags v1.5.0
 	github.com/pelletier/go-toml v1.9.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/slack-go/slack v0.8.2
