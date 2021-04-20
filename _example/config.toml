@@ -10,3 +10,6 @@ url = "http://localhost:8080/ok"
 
 [[target]]
 url = "http://localhost:8080/error"
+
+[[target]]
+url = "http://localhost:8080/timeout"

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 var count int
@@ -19,6 +20,10 @@ func main() {
 		fmt.Fprintf(w, "error\n")
 	})
 
+	http.HandleFunc("/timeout", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(20 * time.Second)
+		fmt.Fprintf(w, "hello\n")
+	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		count += 1
