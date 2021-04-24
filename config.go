@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/url"
 	"os"
 
 	toml "github.com/pelletier/go-toml"
@@ -21,7 +22,24 @@ type Slack struct {
 }
 
 type Target struct {
-	URL string `toml:"url"`
+	URL URL `toml:"url"`
+}
+
+type URL url.URL
+
+func (u *URL) UnmarshalText(text []byte) error {
+	parsedURL, err := url.Parse(string(text))
+	if err != nil {
+		return err
+	}
+
+	*u = URL(*parsedURL)
+
+	return nil
+}
+
+func (u *URL) String() string {
+	return (*url.URL)(u).String()
 }
 
 func LoadConfig(filename string) (*Config, error) {

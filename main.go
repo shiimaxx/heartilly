@@ -19,9 +19,9 @@ type Message struct {
 }
 
 type Worker struct {
-	ID         int
-	URL        string
-	Status     Status
+	ID     int
+	URL    URL
+	Status Status
 
 	Client *http.Client
 
@@ -36,37 +36,37 @@ func (w *Worker) run(ctx context.Context) {
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
-	w.Logger.Info(w.ID, w.URL, "start worker")
+	w.Logger.Info(w.ID, w.URL.String(), "start worker")
 
 	c := time.Tick(1 * time.Minute)
 	for {
-		w.Logger.Info(w.ID, w.URL, "check")
+		w.Logger.Info(w.ID, w.URL.String(), "check")
 
 		ok, err := w.check(ctx)
 		if err == nil {
 			if ok && (!w.Status.Is(Initial) && !w.Status.Is(OK)) {
 				w.Status.Recovery()
 				w.MessageCh <- Message{
-					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
+					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL.String()),
 					StatusType: OK,
 				}
-				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
+				w.Logger.Info(w.ID, w.URL.String(), fmt.Sprintf("status canged: %s", w.Status.String()))
 			} else if !ok && (w.Status.Is(Initial) || w.Status.Is(OK)) {
 				w.Status.Trigger()
 				w.MessageCh <- Message{
-					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
+					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL.String()),
 					StatusType: Alert,
 				}
-				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
+				w.Logger.Info(w.ID, w.URL.String(), fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
 		} else {
 			if !w.Status.Is(Unknown) {
 				w.Status.Unknown()
 				w.MessageCh <- Message{
-					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL),
+					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL.String()),
 					StatusType: Unknown,
 				}
-				w.Logger.Info(w.ID, w.URL, fmt.Sprintf("status canged: %s", w.Status.String()))
+				w.Logger.Info(w.ID, w.URL.String(), fmt.Sprintf("status canged: %s", w.Status.String()))
 			}
 		}
 
@@ -79,7 +79,7 @@ func (w *Worker) run(ctx context.Context) {
 }
 
 func (w *Worker) check(ctx context.Context) (bool, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.URL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.URL.String(), nil)
 	if err != nil {
 		return false, err
 	}
@@ -140,7 +140,7 @@ func main() {
 	}
 	go alertSender.Run()
 
-	var targetURLs []string
+	var targetURLs []URL
 	for _, t := range config.Target {
 		targetURLs = append(targetURLs, t.URL)
 	}

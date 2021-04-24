@@ -1,16 +1,28 @@
 package main
 
 import (
+	"net/url"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func parseURL(t *testing.T, u string) URL {
+	t.Helper()
+
+	parsed, err := url.Parse(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return URL(*parsed)
+}
+
 func TestLoadConfig(t *testing.T) {
-	cases := []struct{
+	cases := []struct {
 		config []byte
-		want *Config
+		want   *Config
 	}{
 		{
 			config: []byte(`[notification.slack]
@@ -25,7 +37,7 @@ url = "https://example.com/check"
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
 				Target: []*Target{
-					{URL: "https://example.com/check"},
+					{URL: parseURL(t, "https://example.com/check")},
 				},
 			},
 		},
@@ -45,12 +57,11 @@ url = "https://example.com/check2"
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
 				Target: []*Target{
-					{URL: "https://example.com/check"},
-					{URL: "https://example.com/check2"},
+					{URL: parseURL(t, "https://example.com/check")},
+					{URL: parseURL(t, "https://example.com/check2")},
 				},
 			},
 		},
-
 	}
 
 	tmpDir, err := os.MkdirTemp("", "")
