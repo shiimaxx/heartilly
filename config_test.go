@@ -30,6 +30,7 @@ token = "dummytoken"
 channel = "#general"
 
 [[target]]
+name = "example.com check"
 url = "https://example.com/check"
 `),
 			want: &Config{
@@ -37,7 +38,10 @@ url = "https://example.com/check"
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
 				Target: []*Target{
-					{URL: parseURL(t, "https://example.com/check")},
+					{
+						Name: "example.com check",
+						URL: parseURL(t, "https://example.com/check"),
+					},
 				},
 			},
 		},
@@ -47,9 +51,11 @@ token = "dummytoken"
 channel = "#general"
 
 [[target]]
+name = "example.com check"
 url = "https://example.com/check"
 
 [[target]]
+name = "example.com check 2"
 url = "https://example.com/check2"
 `),
 			want: &Config{
@@ -57,8 +63,14 @@ url = "https://example.com/check2"
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
 				Target: []*Target{
-					{URL: parseURL(t, "https://example.com/check")},
-					{URL: parseURL(t, "https://example.com/check2")},
+					{
+						Name: "example.com check",
+						URL: parseURL(t, "https://example.com/check"),
+					},
+					{
+						Name: "example.com check 2",
+						URL: parseURL(t, "https://example.com/check2"),
+					},
 				},
 			},
 		},

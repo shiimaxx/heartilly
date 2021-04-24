@@ -22,7 +22,8 @@ type Slack struct {
 }
 
 type Target struct {
-	URL URL `toml:"url"`
+	Name string `toml:"name"`
+	URL  URL    `toml:"url"`
 }
 
 type URL url.URL

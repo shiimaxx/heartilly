@@ -20,7 +20,7 @@ type Message struct {
 
 type Worker struct {
 	ID     int
-	URL    URL
+	Target *Target
 	Status Status
 
 	Client *http.Client
@@ -36,37 +36,62 @@ func (w *Worker) run(ctx context.Context) {
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
-	w.Logger.Info(w.ID, w.URL.String(), "start worker")
+	w.Logger.Info(w.ID, w.Target.URL.String(), "start worker")
 
 	c := time.Tick(1 * time.Minute)
 	for {
-		w.Logger.Info(w.ID, w.URL.String(), "check")
+		w.Logger.Info(w.ID, w.Target.URL.String(), "check")
 
 		ok, err := w.check(ctx)
 		if err == nil {
 			if ok && (!w.Status.Is(Initial) && !w.Status.Is(OK)) {
 				w.Status.Recovery()
 				w.MessageCh <- Message{
-					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL.String()),
+					Text: fmt.Sprintf("[%s]\n%s: %s",
+						w.Target.Name,
+						w.Status.String(),
+						w.Target.URL.String(),
+					),
 					StatusType: OK,
 				}
-				w.Logger.Info(w.ID, w.URL.String(), fmt.Sprintf("status canged: %s", w.Status.String()))
+				w.Logger.Info(
+					w.ID,
+					w.Target.URL.String(),
+					fmt.Sprintf("status canged: %s", w.Status.String()),
+				)
+
 			} else if !ok && (w.Status.Is(Initial) || w.Status.Is(OK)) {
 				w.Status.Trigger()
 				w.MessageCh <- Message{
-					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL.String()),
+					Text: fmt.Sprintf("[%s]\n%s: %s",
+						w.Target.Name,
+						w.Status.String(),
+						w.Target.URL.String(),
+					),
 					StatusType: Alert,
 				}
-				w.Logger.Info(w.ID, w.URL.String(), fmt.Sprintf("status canged: %s", w.Status.String()))
+				w.Logger.Info(
+					w.ID,
+					w.Target.URL.String(),
+					fmt.Sprintf("status canged: %s", w.Status.String()),
+				)
 			}
 		} else {
 			if !w.Status.Is(Unknown) {
 				w.Status.Unknown()
 				w.MessageCh <- Message{
-					Text:       fmt.Sprintf("%s: %s", w.Status.String(), w.URL.String()),
+					Text: fmt.Sprintf("[%s]\n%s: %s",
+						w.Target.Name,
+						w.Status.String(),
+						w.Target.URL.String(),
+					),
 					StatusType: Unknown,
 				}
-				w.Logger.Info(w.ID, w.URL.String(), fmt.Sprintf("status canged: %s", w.Status.String()))
+				w.Logger.Info(
+					w.ID,
+					w.Target.URL.String(),
+					fmt.Sprintf("status canged: %s", w.Status.String()),
+				)
 			}
 		}
 
@@ -79,7 +104,7 @@ func (w *Worker) run(ctx context.Context) {
 }
 
 func (w *Worker) check(ctx context.Context) (bool, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.URL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.Target.URL.String(), nil)
 	if err != nil {
 		return false, err
 	}
@@ -140,15 +165,10 @@ func main() {
 	}
 	go alertSender.Run()
 
-	var targetURLs []URL
-	for _, t := range config.Target {
-		targetURLs = append(targetURLs, t.URL)
-	}
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	for i, url := range targetURLs {
+	for i, t := range config.Target {
 		id := i + 1
 
 		client := http.DefaultClient
@@ -156,7 +176,7 @@ func main() {
 
 		worker := &Worker{
 			ID:     id,
-			URL:    url,
+			Target: t,
 			Status: Initial,
 
 			Client: client,

@@ -3,13 +3,17 @@ token = "token"
 channel = "#general"
 
 [[target]]
+name = "test endpoint"
 url = "http://localhost:8080/"
 
 [[target]]
+name = "test endpoint ok"
 url = "http://localhost:8080/ok"
 
 [[target]]
+name = "test endpoint error"
 url = "http://localhost:8080/error"
 
 [[target]]
+name = "test endpoint timeout"
 url = "http://localhost:8080/timeout"
