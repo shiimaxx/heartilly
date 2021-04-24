@@ -4,8 +4,7 @@ go 1.16
 
 require (
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/pelletier/go-toml v1.9.0
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/kayac/go-config v0.5.1
 	github.com/slack-go/slack v0.8.2
 	github.com/stretchr/testify v1.4.0
 	go.uber.org/zap v1.16.0

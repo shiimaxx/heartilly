@@ -2,9 +2,8 @@ package main
 
 import (
 	"net/url"
-	"os"
 
-	toml "github.com/pelletier/go-toml"
+	gc "github.com/kayac/go-config"
 )
 
 type Config struct {
@@ -46,12 +45,7 @@ func (u *URL) String() string {
 func LoadConfig(filename string) (*Config, error) {
 	config := Config{}
 
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := toml.Unmarshal(data, &config); err != nil {
+	if err := gc.LoadWithEnvTOML(&config, filename); err != nil {
 		return nil, err
 	}
 

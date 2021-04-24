@@ -74,6 +74,31 @@ url = "https://example.com/check2"
 				},
 			},
 		},
+		{
+			config: []byte(`[notification.slack]
+token = '{{ env "TEST_SLACK_TOKEN" }}'
+channel = "#general"
+
+[[target]]
+name = "example.com check"
+url = "https://example.com/check"
+`),
+			want: &Config{
+				Notification: &Notification{
+					Slack: &Slack{Token: "envtoken", Channel: "#general"},
+				},
+				Target: []*Target{
+					{
+						Name: "example.com check",
+						URL: parseURL(t, "https://example.com/check"),
+					},
+				},
+			},
+		},
+	}
+
+	if err := os.Setenv("TEST_SLACK_TOKEN", "envtoken"); err != nil {
+		t.Fatal("set env failed")
 	}
 
 	tmpDir, err := os.MkdirTemp("", "")

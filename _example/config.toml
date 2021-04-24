@@ -1,5 +1,5 @@
 [notification.slack]
-token = "token"
+token = '{{ env "SLACK_TOKEN" }}'
 channel = "#general"
 
 [[target]]
