@@ -1,0 +1,17 @@
+version: "3"
+services:
+  server:
+    build:
+      context: .
+    volumes:
+      - ./_example:/config
+    command: ["/heatilly", "-c", "/config/config.toml"]
+    environment:
+      - SLACK_TOKEN=${SLACK_TOKEN}
+
+  test_target:
+    image: golang
+    volumes:
+      - ./_tool:/tool
+    command: ["go", "run", "/tool/test_target.go"]
+
