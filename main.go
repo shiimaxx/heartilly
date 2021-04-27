@@ -121,7 +121,7 @@ func (w *Worker) check(ctx context.Context) (bool, string, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 400  {
 		return false, resp.Status, nil
 	}
 
