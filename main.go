@@ -42,7 +42,7 @@ func (w *Worker) run(ctx context.Context) {
 	for {
 		w.Logger.Info(w.ID, w.Target.URL.String(), "check")
 
-		ok, err := w.check(ctx)
+		ok, reason, err := w.check(ctx)
 		if err == nil {
 			if ok && (!w.Status.Is(OK)) {
 				w.Status.Recovery()
@@ -51,7 +51,7 @@ func (w *Worker) run(ctx context.Context) {
 						w.Status.String(),
 						w.Target.Name,
 						w.Target.URL.String(),
-						"200 OK", // TODO: reasone
+						reason,
 					),
 					StatusType: OK,
 				}
@@ -68,7 +68,7 @@ func (w *Worker) run(ctx context.Context) {
 						w.Status.String(),
 						w.Target.Name,
 						w.Target.URL.String(),
-						"500 Internal Server Error", // TODO: reasone
+						reason,
 					),
 					StatusType: Critical,
 				}
@@ -82,10 +82,11 @@ func (w *Worker) run(ctx context.Context) {
 			if !w.Status.Is(Unknown) {
 				w.Status.Unknown()
 				w.MessageCh <- Message{
-					Text: fmt.Sprintf("[%s]\n%s: %s",
-						w.Target.Name,
+					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
+						w.Target.Name,
 						w.Target.URL.String(),
+						reason,
 					),
 					StatusType: Unknown,
 				}
@@ -105,26 +106,26 @@ func (w *Worker) run(ctx context.Context) {
 	}
 }
 
-func (w *Worker) check(ctx context.Context) (bool, error) {
+func (w *Worker) check(ctx context.Context) (bool, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.Target.URL.String(), nil)
 	if err != nil {
-		return false, err
+		return false, "error", err
 	}
 
 	resp, err := w.Client.Do(req)
 	if err != nil {
 		if err, ok := err.(net.Error); ok && err.Timeout() {
-			return false, nil
+			return false, "timeout", nil
 		}
-		return false, err
+		return false, "error", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return false, nil
+		return false, resp.Status, nil
 	}
 
-	return true, nil
+	return true, resp.Status, nil
 }
 
 type Options struct {

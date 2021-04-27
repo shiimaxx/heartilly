@@ -3,6 +3,8 @@ services:
   server:
     build:
       context: .
+    depends_on:
+      - test_target
     volumes:
       - ./_example:/config
     command: ["/heatilly", "-c", "/config/config.toml"]
