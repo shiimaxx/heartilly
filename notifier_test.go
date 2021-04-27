@@ -12,7 +12,7 @@ func TestColor(t *testing.T) {
 		want   string
 	}{
 		{status: OK, want: "good"},
-		{status: Alert, want: "danger"},
+		{status: Critical, want: "danger"},
 		{status: Unknown, want: "#808080"},
 	}
 

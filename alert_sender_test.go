@@ -32,7 +32,7 @@ func TestRun(t *testing.T) {
 	messageCh := make(chan Message)
 	errCh := make(chan error)
 
-	dummyMessage := Message{"dummy message", Alert}
+	dummyMessage := Message{"dummy message", Critical}
 	notifierMock := new(NotifierMock)
 
 	notifierMock.On("Notify", dummyMessage).Return(nil)
@@ -54,7 +54,7 @@ func TestRun_notify_error(t *testing.T) {
 	messageCh := make(chan Message)
 	errCh := make(chan error)
 
-	dummyMessage := Message{"dummy message", Alert}
+	dummyMessage := Message{"dummy message", Critical}
 	notifierMock := new(NotifierMock)
 
 	notifierMock.On("Notify", dummyMessage).Return(fmt.Errorf("error"))

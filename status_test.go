@@ -12,19 +12,15 @@ func TestString(t *testing.T) {
 		want   string
 	}{
 		{
-			status: Initial,
-			want: "Initial",
-		},
-		{
 			status: OK,
 			want: "OK", },
 		{
-			status: Alert,
-			want: "Alert",
+			status: Critical,
+			want: "CRITICAL",
 		},
 		{
 			status: Unknown,
-			want: "Unknown",
+			want: "UNKNOWN",
 		},
 	}
 
@@ -35,21 +31,21 @@ func TestString(t *testing.T) {
 }
 
 func TestRecovery(t *testing.T) {
-	for _, s := range []Status{Initial, OK, Alert, Unknown} {
+	for _, s := range []Status{OK, Critical, Unknown} {
 		s.Recovery()
 		assert.Equal(t, OK, s)
 	}
 }
 
 func TestTrigger(t *testing.T) {
-	for _, s := range []Status{Initial, OK, Alert, Unknown} {
+	for _, s := range []Status{OK, Critical, Unknown} {
 		s.Trigger()
-		assert.Equal(t, Alert, s)
+		assert.Equal(t, Critical, s)
 	}
 }
 
 func TestUnknown(t *testing.T) {
-	for _, s := range []Status{Initial, OK, Alert, Unknown} {
+	for _, s := range []Status{OK, Critical, Unknown} {
 		s.Unknown()
 		assert.Equal(t, Unknown, s)
 	}
@@ -61,16 +57,12 @@ func TestIs_true(t *testing.T) {
 		is Status
 	}{
 		{
-			status: Initial,
-			is: Initial,
-		},
-		{
 			status: OK,
 			is: OK,
 		},
 		{
-			status: Alert,
-			is: Alert,
+			status: Critical,
+			is: Critical,
 		},
 		{
 			status: Unknown,
@@ -89,44 +81,20 @@ func TestIs_false(t *testing.T) {
 		is Status
 	}{
 		{
-			status: Initial,
+			status: OK,
+			is: Critical,
+		},
+		{
+			status: OK,
+			is: Unknown,
+		},
+		{
+			status: Critical,
 			is: OK,
 		},
 		{
-			status: Initial,
-			is: Alert,
-		},
-		{
-			status: Initial,
+			status: Critical,
 			is: Unknown,
-		},
-		{
-			status: OK,
-			is: Initial,
-		},
-		{
-			status: OK,
-			is: Alert,
-		},
-		{
-			status: OK,
-			is: Unknown,
-		},
-		{
-			status: Alert,
-			is: Initial,
-		},
-		{
-			status: Alert,
-			is: OK,
-		},
-		{
-			status: Alert,
-			is: Unknown,
-		},
-		{
-			status: Unknown,
-			is: Initial,
 		},
 		{
 			status: Unknown,
@@ -134,7 +102,7 @@ func TestIs_false(t *testing.T) {
 		},
 		{
 			status: Unknown,
-			is: Alert,
+			is: Critical,
 		},
 	}
 

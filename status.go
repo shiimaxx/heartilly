@@ -3,22 +3,19 @@ package main
 type Status int
 
 const (
-	Initial Status = iota
-	OK
-	Alert
+	OK Status = iota
+	Critical
 	Unknown
 )
 
 func (s *Status) String() string {
 	switch {
-	case *s == Initial:
-		return "Initial"
 	case *s == OK:
 		return "OK"
-	case *s == Alert:
-		return "Alert"
+	case *s == Critical:
+		return "CRITICAL"
 	default:
-		return "Unknown"
+		return "UNKNOWN"
 	}
 }
 
@@ -27,7 +24,7 @@ func (s *Status) Recovery() {
 }
 
 func (s *Status) Trigger() {
-	*s = Alert
+	*s = Critical
 }
 
 func (s *Status) Unknown() {

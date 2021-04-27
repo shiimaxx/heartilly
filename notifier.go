@@ -38,7 +38,7 @@ func (s *SlackNotifier) color(status Status) string {
 	switch {
 	case status == OK:
 		return "good"
-	case status == Alert:
+	case status == Critical:
 		return "danger"
 	default:
 		return "#808080"

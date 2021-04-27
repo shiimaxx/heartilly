@@ -44,13 +44,14 @@ func (w *Worker) run(ctx context.Context) {
 
 		ok, err := w.check(ctx)
 		if err == nil {
-			if ok && (!w.Status.Is(Initial) && !w.Status.Is(OK)) {
+			if ok && (!w.Status.Is(OK)) {
 				w.Status.Recovery()
 				w.MessageCh <- Message{
-					Text: fmt.Sprintf("[%s]\n%s: %s",
-						w.Target.Name,
+					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
+						w.Target.Name,
 						w.Target.URL.String(),
+						"200 OK", // TODO: reasone
 					),
 					StatusType: OK,
 				}
@@ -60,15 +61,16 @@ func (w *Worker) run(ctx context.Context) {
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 
-			} else if !ok && (w.Status.Is(Initial) || w.Status.Is(OK)) {
+			} else if !ok && (w.Status.Is(OK)) {
 				w.Status.Trigger()
 				w.MessageCh <- Message{
-					Text: fmt.Sprintf("[%s]\n%s: %s",
-						w.Target.Name,
+					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
+						w.Target.Name,
 						w.Target.URL.String(),
+						"500 Internal Server Error", // TODO: reasone
 					),
-					StatusType: Alert,
+					StatusType: Critical,
 				}
 				w.Logger.Info(
 					w.ID,
@@ -177,7 +179,7 @@ func main() {
 		worker := &Worker{
 			ID:     id,
 			Target: t,
-			Status: Initial,
+			Status: OK,
 
 			Client: client,
 
