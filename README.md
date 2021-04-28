@@ -18,7 +18,7 @@ heartilly -c config.toml
 
 ## Configuration
 
-```
+```toml
 [notification.slack]
 token = "token"
 channel = "#general"
@@ -27,6 +27,11 @@ channel = "#general"
 url = "https://example.com/check"
 
 [[target]]
-url = "https://example.com/check2"
+url = "https://example.com/check_post"
+method = "POST"
+
+[[target]]
+url = "https://example.com/check_follow_redirect"
+follow = true
 ```
 
