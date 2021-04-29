@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -20,10 +18,9 @@ type Message struct {
 
 type Worker struct {
 	ID     int
-	Target *Target
 	Status Status
 
-	Client *http.Client
+	Probe *Probe
 
 	MessageCh chan<- Message
 
@@ -36,28 +33,28 @@ func (w *Worker) run(ctx context.Context) {
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
-	w.Logger.Info(w.ID, w.Target.URL.String(), "start worker")
+	w.Logger.Info(w.ID, w.Probe.Target.URL.String(), "start worker")
 
 	c := time.Tick(1 * time.Minute)
 	for {
-		w.Logger.Info(w.ID, w.Target.URL.String(), "check")
+		w.Logger.Info(w.ID, w.Probe.Target.URL.String(), "check")
 
-		ok, reason, err := w.check(ctx)
+		ok, reason, err := w.Probe.Check(ctx)
 		if err == nil {
 			if ok && (!w.Status.Is(OK)) {
 				w.Status.Recovery()
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
-						w.Target.Name,
-						w.Target.URL.String(),
+						w.Probe.Target.Name,
+						w.Probe.Target.URL.String(),
 						reason,
 					),
 					StatusType: OK,
 				}
 				w.Logger.Info(
 					w.ID,
-					w.Target.URL.String(),
+					w.Probe.Target.URL.String(),
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 
@@ -66,15 +63,15 @@ func (w *Worker) run(ctx context.Context) {
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
-						w.Target.Name,
-						w.Target.URL.String(),
+						w.Probe.Target.Name,
+						w.Probe.Target.URL.String(),
 						reason,
 					),
 					StatusType: Critical,
 				}
 				w.Logger.Info(
 					w.ID,
-					w.Target.URL.String(),
+					w.Probe.Target.URL.String(),
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 			}
@@ -84,15 +81,15 @@ func (w *Worker) run(ctx context.Context) {
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
-						w.Target.Name,
-						w.Target.URL.String(),
+						w.Probe.Target.Name,
+						w.Probe.Target.URL.String(),
 						reason,
 					),
 					StatusType: Unknown,
 				}
 				w.Logger.Info(
 					w.ID,
-					w.Target.URL.String(),
+					w.Probe.Target.URL.String(),
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 			}
@@ -104,28 +101,6 @@ func (w *Worker) run(ctx context.Context) {
 			return
 		}
 	}
-}
-
-func (w *Worker) check(ctx context.Context) (bool, string, error) {
-	req, err := http.NewRequestWithContext(ctx, w.Target.Method, w.Target.URL.String(), nil)
-	if err != nil {
-		return false, "error", err
-	}
-
-	resp, err := w.Client.Do(req)
-	if err != nil {
-		if err, ok := err.(net.Error); ok && err.Timeout() {
-			return false, "timeout", nil
-		}
-		return false, "error", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400  {
-		return false, resp.Status, nil
-	}
-
-	return true, resp.Status, nil
 }
 
 type Options struct {
@@ -174,20 +149,15 @@ func main() {
 	for i, t := range config.Target {
 		id := i + 1
 
-		client := http.DefaultClient
-		if !t.Follow {
-			client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-				return http.ErrUseLastResponse
-			}
+		p := &Probe{
+			Target: t,
 		}
-		client.Timeout = 15 * time.Second
 
 		worker := &Worker{
 			ID:     id,
-			Target: t,
 			Status: OK,
 
-			Client: client,
+			Probe: p,
 
 			MessageCh: messageCh,
 
