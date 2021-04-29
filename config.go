@@ -21,8 +21,10 @@ type Slack struct {
 }
 
 type Target struct {
-	Name string `toml:"name"`
-	URL  URL    `toml:"url"`
+	Name   string `toml:"name"`
+	Method string `toml:"method"`
+	URL    URL    `toml:"url"`
+	Follow bool   `toml:"follow"`
 }
 
 type URL url.URL
@@ -47,6 +49,12 @@ func LoadConfig(filename string) (*Config, error) {
 
 	if err := gc.LoadWithEnvTOML(&config, filename); err != nil {
 		return nil, err
+	}
+
+	for _, t := range config.Target {
+		if t.Method == "" {
+			t.Method = "GET"
+		}
 	}
 
 	return &config, nil

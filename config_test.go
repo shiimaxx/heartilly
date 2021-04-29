@@ -39,8 +39,10 @@ url = "https://example.com/check"
 				},
 				Target: []*Target{
 					{
-						Name: "example.com check",
-						URL: parseURL(t, "https://example.com/check"),
+						Name:   "example.com check",
+						Method: "GET",
+						URL:    parseURL(t, "https://example.com/check"),
+						Follow: false,
 					},
 				},
 			},
@@ -64,12 +66,16 @@ url = "https://example.com/check2"
 				},
 				Target: []*Target{
 					{
-						Name: "example.com check",
-						URL: parseURL(t, "https://example.com/check"),
+						Name:   "example.com check",
+						Method: "GET",
+						URL:    parseURL(t, "https://example.com/check"),
+						Follow: false,
 					},
 					{
-						Name: "example.com check 2",
-						URL: parseURL(t, "https://example.com/check2"),
+						Name:   "example.com check 2",
+						Method: "GET",
+						URL:    parseURL(t, "https://example.com/check2"),
+						Follow: false,
 					},
 				},
 			},
@@ -89,8 +95,45 @@ url = "https://example.com/check"
 				},
 				Target: []*Target{
 					{
-						Name: "example.com check",
-						URL: parseURL(t, "https://example.com/check"),
+						Name:   "example.com check",
+						Method: "GET",
+						URL:    parseURL(t, "https://example.com/check"),
+						Follow: false,
+					},
+				},
+			},
+		},
+		{
+			config: []byte(`[notification.slack]
+token = "dummytoken"
+channel = "#general"
+
+[[target]]
+name = "example.com post check"
+method = "POST"
+url = "https://example.com/check"
+
+[[target]]
+name = "example.com follow check"
+url = "https://example.com/check"
+follow = true
+`),
+			want: &Config{
+				Notification: &Notification{
+					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
+				},
+				Target: []*Target{
+					{
+						Name:   "example.com post check",
+						Method: "POST",
+						URL:    parseURL(t, "https://example.com/check"),
+						Follow: false,
+					},
+					{
+						Name:   "example.com follow check",
+						Method: "GET",
+						URL:    parseURL(t, "https://example.com/check"),
+						Follow: true,
 					},
 				},
 			},

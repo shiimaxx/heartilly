@@ -107,7 +107,7 @@ func (w *Worker) run(ctx context.Context) {
 }
 
 func (w *Worker) check(ctx context.Context) (bool, string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, w.Target.URL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, w.Target.Method, w.Target.URL.String(), nil)
 	if err != nil {
 		return false, "error", err
 	}
@@ -175,6 +175,11 @@ func main() {
 		id := i + 1
 
 		client := http.DefaultClient
+		if !t.Follow {
+			client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse
+			}
+		}
 		client.Timeout = 15 * time.Second
 
 		worker := &Worker{
