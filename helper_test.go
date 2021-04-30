@@ -15,5 +15,3 @@ func parseURL(t *testing.T, u string) URL {
 
 	return URL(*parsed)
 }
-
-

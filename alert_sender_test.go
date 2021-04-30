@@ -18,7 +18,7 @@ func (m *NotifierMock) Notify(msg Message) error {
 	return args.Error(0)
 }
 
-func TestSetNotifier(t *testing.T) {
+func TestAlertSender_SetNotifier(t *testing.T) {
 	alertSender := &AlertSender{}
 	alertSender.SetNotifier(NewSlackNotifier("token", "channel"))
 	alertSender.SetNotifier(NewSlackNotifier("token", "channel"))
@@ -28,7 +28,7 @@ func TestSetNotifier(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
-func TestRun(t *testing.T) {
+func TestAlertSender_Run(t *testing.T) {
 	messageCh := make(chan Message)
 	errCh := make(chan error)
 
@@ -50,7 +50,7 @@ func TestRun(t *testing.T) {
 	notifierMock.AssertExpectations(t)
 }
 
-func TestRun_notify_error(t *testing.T) {
+func TestAlertSender_Run_notify_error(t *testing.T) {
 	messageCh := make(chan Message)
 	errCh := make(chan error)
 

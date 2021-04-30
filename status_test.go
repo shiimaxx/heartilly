@@ -1,112 +1,119 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestString(t *testing.T) {
+func TestStatus_String(t *testing.T) {
 	cases := []struct {
 		status Status
 		want   string
 	}{
 		{
 			status: OK,
-			want: "OK", },
+			want:   "OK"},
 		{
 			status: Critical,
-			want: "CRITICAL",
+			want:   "CRITICAL",
 		},
 		{
 			status: Unknown,
-			want: "UNKNOWN",
+			want:   "UNKNOWN",
 		},
 	}
 
 	for _, c := range cases {
-		got := c.status.String()
-		assert.Equal(t, c.want, got)
+		t.Run(c.status.String(), func(t *testing.T) {
+			got := c.status.String()
+			assert.Equal(t, c.want, got)
+		})
 	}
 }
 
-func TestRecovery(t *testing.T) {
+func TestStatus_Recovery(t *testing.T) {
 	for _, s := range []Status{OK, Critical, Unknown} {
 		s.Recovery()
 		assert.Equal(t, OK, s)
 	}
 }
 
-func TestTrigger(t *testing.T) {
+func TestStatus_Trigger(t *testing.T) {
 	for _, s := range []Status{OK, Critical, Unknown} {
 		s.Trigger()
 		assert.Equal(t, Critical, s)
 	}
 }
 
-func TestUnknown(t *testing.T) {
+func TestStatus_Unknown(t *testing.T) {
 	for _, s := range []Status{OK, Critical, Unknown} {
 		s.Unknown()
 		assert.Equal(t, Unknown, s)
 	}
 }
 
-func TestIs_true(t *testing.T) {
+func TestStatus_Is_true(t *testing.T) {
 	cases := []struct {
 		status Status
-		is Status
+		is     Status
 	}{
 		{
 			status: OK,
-			is: OK,
+			is:     OK,
 		},
 		{
 			status: Critical,
-			is: Critical,
+			is:     Critical,
 		},
 		{
 			status: Unknown,
-			is: Unknown,
+			is:     Unknown,
 		},
 	}
 
 	for _, c := range cases {
-		assert.True(t, c.status.Is(c.is))	
+		t.Run(c.status.String(), func(t *testing.T) {
+			assert.True(t, c.status.Is(c.is))
+		})
 	}
 }
 
-func TestIs_false(t *testing.T) {
+func TestStatus_Is_false(t *testing.T) {
 	cases := []struct {
 		status Status
-		is Status
+		is     Status
 	}{
 		{
 			status: OK,
-			is: Critical,
+			is:     Critical,
 		},
 		{
 			status: OK,
-			is: Unknown,
+			is:     Unknown,
 		},
 		{
 			status: Critical,
-			is: OK,
+			is:     OK,
 		},
 		{
 			status: Critical,
-			is: Unknown,
+			is:     Unknown,
 		},
 		{
 			status: Unknown,
-			is: OK,
+			is:     OK,
 		},
 		{
 			status: Unknown,
-			is: Critical,
+			is:     Critical,
 		},
 	}
 
 	for _, c := range cases {
-		assert.False(t, c.status.Is(c.is))	
+		t.Run(fmt.Sprintf("%s->%s", c.status.String(), c.is.String()), func(t *testing.T) {
+			assert.False(t, c.status.Is(c.is))
+		})
 	}
 }

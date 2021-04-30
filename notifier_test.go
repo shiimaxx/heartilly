@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestColor(t *testing.T) {
+func TestSlackNotifier_color(t *testing.T) {
 	cases := []struct {
 		status Status
 		want   string
@@ -18,7 +18,9 @@ func TestColor(t *testing.T) {
 
 	s := SlackNotifier{}
 	for _, c := range cases {
-		got := s.color(c.status)
-		assert.Equal(t, c.want, got)
+		t.Run(c.status.String(), func(t *testing.T) {
+			got := s.color(c.status)
+			assert.Equal(t, c.want, got)
+		})
 	}
 }

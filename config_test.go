@@ -9,10 +9,12 @@ import (
 
 func TestLoadConfig(t *testing.T) {
 	cases := []struct {
+		name   string
 		config []byte
 		want   *Config
 	}{
 		{
+			name: "standard config",
 			config: []byte(`[notification.slack]
 token = "dummytoken"
 channel = "#general"
@@ -36,6 +38,7 @@ url = "https://example.com/check"
 			},
 		},
 		{
+			name: "multiple target",
 			config: []byte(`[notification.slack]
 token = "dummytoken"
 channel = "#general"
@@ -69,6 +72,7 @@ url = "https://example.com/check2"
 			},
 		},
 		{
+			name: "envvar",
 			config: []byte(`[notification.slack]
 token = '{{ env "TEST_SLACK_TOKEN" }}'
 channel = "#general"
@@ -92,6 +96,7 @@ url = "https://example.com/check"
 			},
 		},
 		{
+			name: "method and follow",
 			config: []byte(`[notification.slack]
 token = "dummytoken"
 channel = "#general"
@@ -137,17 +142,19 @@ follow = true
 		t.Fatal("create temporary directory failed")
 	}
 	for _, c := range cases {
-		f, err := os.CreateTemp(tmpDir, "")
-		if err != nil {
-			t.Fatal("create temporary file failed")
-		}
+		t.Run(c.name, func(t *testing.T) {
+			f, err := os.CreateTemp(tmpDir, "")
+			if err != nil {
+				t.Fatal("create temporary file failed")
+			}
 
-		if err := os.WriteFile(f.Name(), c.config, os.ModeTemporary); err != nil {
-			t.Fatal("write file failed")
-		}
+			if err := os.WriteFile(f.Name(), c.config, os.ModeTemporary); err != nil {
+				t.Fatal("write file failed")
+			}
 
-		config, err := LoadConfig(f.Name())
-		assert.Nil(t, err)
-		assert.Equal(t, c.want, config)
+			config, err := LoadConfig(f.Name())
+			assert.Nil(t, err)
+			assert.Equal(t, c.want, config)
+		})
 	}
 }
