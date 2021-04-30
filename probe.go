@@ -13,11 +13,14 @@ type Probe struct {
 
 func (p *Probe) Check(ctx context.Context) (bool, string, error) {
 	client := http.DefaultClient
-	if !p.Target.Follow {
+	if p.Target.Follow {
+		client.CheckRedirect = nil
+	} else {
 		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}
 	}
+
 	client.Timeout = 15 * time.Second
 
 	req, err := http.NewRequestWithContext(ctx, p.Target.Method, p.Target.URL.String(), nil)
