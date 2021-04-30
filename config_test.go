@@ -1,23 +1,11 @@
 package main
 
 import (
-	"net/url"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func parseURL(t *testing.T, u string) URL {
-	t.Helper()
-
-	parsed, err := url.Parse(u)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return URL(*parsed)
-}
 
 func TestLoadConfig(t *testing.T) {
 	cases := []struct {
