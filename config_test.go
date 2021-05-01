@@ -90,6 +90,7 @@ name = "example.com check"
 url = "https://example.com/check"
 `),
 			want: &Config{
+				DBFile: "/var/lib/heartilly.db",
 				Notification: &Notification{
 					Slack: &Slack{Token: "envtoken", Channel: "#general"},
 				},
@@ -122,6 +123,7 @@ url = "https://example.com/check"
 follow = true
 `),
 			want: &Config{
+				DBFile: "/var/lib/heartilly.db",
 				Notification: &Notification{
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
