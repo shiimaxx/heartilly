@@ -33,11 +33,11 @@ func (w *Worker) run(ctx context.Context) {
 	jitter := rand.Intn(10)
 	time.Sleep(time.Duration(jitter) * time.Second)
 
-	w.Logger.Info(w.ID, w.Probe.Target.URL.String(), "start worker")
+	w.Logger.Info(w.ID, w.Probe.Monitor.URL.String(), "start worker")
 
 	c := time.Tick(1 * time.Minute)
 	for {
-		w.Logger.Info(w.ID, w.Probe.Target.URL.String(), "check")
+		w.Logger.Info(w.ID, w.Probe.Monitor.URL.String(), "check")
 
 		ok, reason, err := w.Probe.Check(ctx)
 		if err == nil {
@@ -46,15 +46,15 @@ func (w *Worker) run(ctx context.Context) {
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
-						w.Probe.Target.Name,
-						w.Probe.Target.URL.String(),
+						w.Probe.Monitor.Name,
+						w.Probe.Monitor.URL.String(),
 						reason,
 					),
 					StatusType: OK,
 				}
 				w.Logger.Info(
 					w.ID,
-					w.Probe.Target.URL.String(),
+					w.Probe.Monitor.URL.String(),
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 
@@ -63,15 +63,15 @@ func (w *Worker) run(ctx context.Context) {
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
-						w.Probe.Target.Name,
-						w.Probe.Target.URL.String(),
+						w.Probe.Monitor.Name,
+						w.Probe.Monitor.URL.String(),
 						reason,
 					),
 					StatusType: Critical,
 				}
 				w.Logger.Info(
 					w.ID,
-					w.Probe.Target.URL.String(),
+					w.Probe.Monitor.URL.String(),
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 			}
@@ -81,15 +81,15 @@ func (w *Worker) run(ctx context.Context) {
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
-						w.Probe.Target.Name,
-						w.Probe.Target.URL.String(),
+						w.Probe.Monitor.Name,
+						w.Probe.Monitor.URL.String(),
 						reason,
 					),
 					StatusType: Unknown,
 				}
 				w.Logger.Info(
 					w.ID,
-					w.Probe.Target.URL.String(),
+					w.Probe.Monitor.URL.String(),
 					fmt.Sprintf("status canged: %s", w.Status.String()),
 				)
 			}
@@ -146,11 +146,11 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	for i, t := range config.Target {
+	for i, m := range config.Monitors {
 		id := i + 1
 
 		p := &Probe{
-			Target: t,
+			Monitor: m,
 		}
 
 		worker := &Worker{

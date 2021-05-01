@@ -8,12 +8,12 @@ import (
 )
 
 type Probe struct {
-	Target *Target
+	Monitor *Monitor
 }
 
 func (p *Probe) Check(ctx context.Context) (bool, string, error) {
 	client := http.DefaultClient
-	if p.Target.Follow {
+	if p.Monitor.Follow {
 		client.CheckRedirect = nil
 	} else {
 		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
@@ -23,7 +23,7 @@ func (p *Probe) Check(ctx context.Context) (bool, string, error) {
 
 	client.Timeout = 15 * time.Second
 
-	req, err := http.NewRequestWithContext(ctx, p.Target.Method, p.Target.URL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, p.Monitor.Method, p.Monitor.URL.String(), nil)
 	if err != nil {
 		return false, "error", err
 	}

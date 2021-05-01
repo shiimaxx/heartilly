@@ -23,14 +23,17 @@ heartilly -c config.toml
 token = "token"
 channel = "#general"
 
-[[target]]
+[[monitor]]
+name = "check"
 url = "https://example.com/check"
 
-[[target]]
+[[monitor]]
+name = "check post"
 url = "https://example.com/check_post"
 method = "POST"
 
-[[target]]
+[[monitor]]
+name = "check follow redirect"
 url = "https://example.com/check_follow_redirect"
 follow = true
 ```

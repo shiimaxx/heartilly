@@ -85,12 +85,12 @@ func TestProbe_Check(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			target := &Target{
+			monitor := &Monitor{
 				Method: c.method,
 				URL:    parseURL(t, fmt.Sprintf("%s%s", ts.URL, c.path)),
 				Follow: c.follow,
 			}
-			probe := &Probe{Target: target}
+			probe := &Probe{Monitor: monitor}
 			result, reason, err := probe.Check(context.TODO())
 
 			assert.Equal(t, c.wantResult, result)

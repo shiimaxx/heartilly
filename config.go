@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	Notification *Notification `toml:"notification"`
-	Target       []*Target     `toml:"target"`
+	Monitors       []*Monitor     `toml:"monitor"`
 }
 
 type Notification struct {
@@ -20,7 +20,7 @@ type Slack struct {
 	Channel string `toml:"channel"`
 }
 
-type Target struct {
+type Monitor struct {
 	Name   string `toml:"name"`
 	Method string `toml:"method"`
 	URL    URL    `toml:"url"`
@@ -51,9 +51,9 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, err
 	}
 
-	for _, t := range config.Target {
-		if t.Method == "" {
-			t.Method = "GET"
+	for _, m := range config.Monitors {
+		if m.Method == "" {
+			m.Method = "GET"
 		}
 	}
 

@@ -2,18 +2,18 @@
 token = '{{ env "SLACK_TOKEN" }}'
 channel = "#general"
 
-[[target]]
+[[monitor]]
 name = "test endpoint"
 url = "http://test_target:8080/"
 
-[[target]]
+[[monitor]]
 name = "test endpoint ok"
 url = "http://test_target:8080/ok"
 
-[[target]]
+[[monitor]]
 name = "test endpoint error"
 url = "http://test_target:8080/error"
 
-[[target]]
+[[monitor]]
 name = "test endpoint timeout"
 url = "http://test_target:8080/timeout"

@@ -19,7 +19,7 @@ func TestLoadConfig(t *testing.T) {
 token = "dummytoken"
 channel = "#general"
 
-[[target]]
+[[monitor]]
 name = "example.com check"
 url = "https://example.com/check"
 `),
@@ -27,7 +27,7 @@ url = "https://example.com/check"
 				Notification: &Notification{
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
-				Target: []*Target{
+				Monitors: []*Monitor{
 					{
 						Name:   "example.com check",
 						Method: "GET",
@@ -38,16 +38,16 @@ url = "https://example.com/check"
 			},
 		},
 		{
-			name: "multiple target",
+			name: "multiple monitors",
 			config: []byte(`[notification.slack]
 token = "dummytoken"
 channel = "#general"
 
-[[target]]
+[[monitor]]
 name = "example.com check"
 url = "https://example.com/check"
 
-[[target]]
+[[monitor]]
 name = "example.com check 2"
 url = "https://example.com/check2"
 `),
@@ -55,7 +55,7 @@ url = "https://example.com/check2"
 				Notification: &Notification{
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
-				Target: []*Target{
+				Monitors: []*Monitor{
 					{
 						Name:   "example.com check",
 						Method: "GET",
@@ -77,7 +77,7 @@ url = "https://example.com/check2"
 token = '{{ env "TEST_SLACK_TOKEN" }}'
 channel = "#general"
 
-[[target]]
+[[monitor]]
 name = "example.com check"
 url = "https://example.com/check"
 `),
@@ -85,7 +85,7 @@ url = "https://example.com/check"
 				Notification: &Notification{
 					Slack: &Slack{Token: "envtoken", Channel: "#general"},
 				},
-				Target: []*Target{
+				Monitors: []*Monitor{
 					{
 						Name:   "example.com check",
 						Method: "GET",
@@ -101,12 +101,12 @@ url = "https://example.com/check"
 token = "dummytoken"
 channel = "#general"
 
-[[target]]
+[[monitor]]
 name = "example.com post check"
 method = "POST"
 url = "https://example.com/check"
 
-[[target]]
+[[monitor]]
 name = "example.com follow check"
 url = "https://example.com/check"
 follow = true
@@ -115,7 +115,7 @@ follow = true
 				Notification: &Notification{
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
-				Target: []*Target{
+				Monitors: []*Monitor{
 					{
 						Name:   "example.com post check",
 						Method: "POST",
