@@ -7,11 +7,11 @@ import (
 )
 
 type Monitor struct {
-	ID     int64  `toml:"-" db:"id"`
-	Name   string `toml:"name" db:"name"`
-	Method string `toml:"method" db:"method"`
-	URL    URL    `toml:"url" db:"url"`
-	Follow bool   `toml:"follow" db:"follow"`
+	ID     int64  `json:"id" toml:"-" db:"id"`
+	Name   string `json:"name" toml:"name" db:"name"`
+	Method string `json:"method" toml:"method" db:"method"`
+	URL    URL    `json:"url" toml:"url" db:"url"`
+	Follow bool   `json:"follow" toml:"follow" db:"follow"`
 }
 
 func InitSyncMonitor(monitors []*Monitor) ([]*Monitor, error) {
@@ -54,6 +54,12 @@ func (u *URL) Scan(value interface{}) error {
 	return nil
 }
 
+// https://golang.org/pkg/encoding/#TextMarshaler
+func (u *URL) MarshalText() ([]byte, error) {
+	return []byte(u.String()), nil
+}
+
+// https://golang.org/pkg/encoding/#TextUnmarshaler
 func (u *URL) UnmarshalText(text []byte) error {
 	parsedURL, err := url.Parse(string(text))
 	if err != nil {

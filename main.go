@@ -179,6 +179,13 @@ func main() {
 		go worker.run(ctx)
 	}
 
+	httpSrv := NewHTTPServer()
+	go func(){
+		if err := httpSrv.Start(":8000"); err != nil {
+			errCh <- err
+		}
+	}()
+
 	for {
 		select {
 		case err := <-errCh:
