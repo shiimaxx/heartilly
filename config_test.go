@@ -15,7 +15,9 @@ func TestLoadConfig(t *testing.T) {
 	}{
 		{
 			name: "standard config",
-			config: []byte(`[notification.slack]
+			config: []byte(`dbfile = "/var/lib/heartilly.db"
+
+[notification.slack]
 token = "dummytoken"
 channel = "#general"
 
@@ -24,6 +26,7 @@ name = "example.com check"
 url = "https://example.com/check"
 `),
 			want: &Config{
+				DBFile: "/var/lib/heartilly.db",
 				Notification: &Notification{
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
@@ -39,7 +42,9 @@ url = "https://example.com/check"
 		},
 		{
 			name: "multiple monitors",
-			config: []byte(`[notification.slack]
+			config: []byte(`dbfile = "/var/lib/heartilly.db"
+
+[notification.slack]
 token = "dummytoken"
 channel = "#general"
 
@@ -52,6 +57,7 @@ name = "example.com check 2"
 url = "https://example.com/check2"
 `),
 			want: &Config{
+				DBFile: "/var/lib/heartilly.db",
 				Notification: &Notification{
 					Slack: &Slack{Token: "dummytoken", Channel: "#general"},
 				},
@@ -73,7 +79,9 @@ url = "https://example.com/check2"
 		},
 		{
 			name: "envvar",
-			config: []byte(`[notification.slack]
+			config: []byte(`dbfile = "/var/lib/heartilly.db"
+
+[notification.slack]
 token = '{{ env "TEST_SLACK_TOKEN" }}'
 channel = "#general"
 
@@ -97,7 +105,9 @@ url = "https://example.com/check"
 		},
 		{
 			name: "method and follow",
-			config: []byte(`[notification.slack]
+			config: []byte(`dbfile = "/var/lib/heartilly.db"
+
+[notification.slack]
 token = "dummytoken"
 channel = "#general"
 

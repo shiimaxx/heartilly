@@ -127,10 +127,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := OpenDB(); err != nil {
+	if err := OpenDB(config.DBFile); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
+
+	logger.Info(0, "", fmt.Sprint("open dbfile: ", config.DBFile))
 
 	monitors, err := InitSyncMonitor(config.Monitors)
 	if err != nil {

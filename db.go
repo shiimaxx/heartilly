@@ -7,9 +7,9 @@ import (
 
 var db *sqlx.DB
 
-func OpenDB() error {
+func OpenDB(dbfile string) error {
 	var err error
-	db, err = sqlx.Open("sqlite3", "heartilly.db")
+	db, err = sqlx.Open("sqlite3", dbfile)
 	if err != nil {
 		return err
 	}

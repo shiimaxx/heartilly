@@ -1,3 +1,5 @@
+dbfile = "/app/heartilly.db"
+
 [notification.slack]
 token = '{{ env "SLACK_TOKEN" }}'
 channel = "#general"

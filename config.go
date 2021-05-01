@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct {
+	DBFile       string        `toml:"dbfile"`
 	Notification *Notification `toml:"notification"`
 	Monitors     []*Monitor    `toml:"monitor"`
 }
