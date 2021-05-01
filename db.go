@@ -1,0 +1,74 @@
+package main
+
+import (
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
+)
+
+var db *sqlx.DB
+
+func OpenDB() error {
+	var err error
+	db, err = sqlx.Open("sqlite3", "heartilly.db")
+	if err != nil {
+		return err
+	}
+
+	createMonitor := `
+	CREATE TABLE IF NOT EXISTS monitor (
+	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	  name TEXT UNIQUE,
+	  method TEXT,
+	  url TEXT, 
+	  follow INTEGER
+	);
+	`
+	if _, err := db.Exec(createMonitor); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetMonitors() ([]*Monitor, error) {
+	var monitors []*Monitor
+
+	query := `SELECT * FROM monitor`
+	if err := db.Select(&monitors, query); err != nil {
+		return nil, err
+	}
+
+	return monitors, nil
+}
+
+func GetMonitorByName(name string) (*Monitor, error) {
+	query := `SELECT * FROM monitor WHERE name = ?`
+	monitor := Monitor{}
+
+	if err := db.Get(&monitor, query, name); err != nil {
+		return nil, err
+	}
+
+	return &monitor, nil
+}
+
+func CreateMonitors(monitors []*Monitor) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare("INSERT INTO monitor(name, method, url, follow) VALUES(?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+
+	for _, m := range monitors {
+		_, err = stmt.Exec(m.Name, m.Method, m.URL.String(), m.Follow)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}

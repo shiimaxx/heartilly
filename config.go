@@ -1,14 +1,12 @@
 package main
 
 import (
-	"net/url"
-
 	gc "github.com/kayac/go-config"
 )
 
 type Config struct {
 	Notification *Notification `toml:"notification"`
-	Monitors       []*Monitor     `toml:"monitor"`
+	Monitors     []*Monitor    `toml:"monitor"`
 }
 
 type Notification struct {
@@ -18,30 +16,6 @@ type Notification struct {
 type Slack struct {
 	Token   string `toml:"token"`
 	Channel string `toml:"channel"`
-}
-
-type Monitor struct {
-	Name   string `toml:"name"`
-	Method string `toml:"method"`
-	URL    URL    `toml:"url"`
-	Follow bool   `toml:"follow"`
-}
-
-type URL url.URL
-
-func (u *URL) UnmarshalText(text []byte) error {
-	parsedURL, err := url.Parse(string(text))
-	if err != nil {
-		return err
-	}
-
-	*u = URL(*parsedURL)
-
-	return nil
-}
-
-func (u *URL) String() string {
-	return (*url.URL)(u).String()
 }
 
 func LoadConfig(filename string) (*Config, error) {

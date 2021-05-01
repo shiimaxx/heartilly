@@ -127,6 +127,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := OpenDB(); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	monitors, err := InitSyncMonitor(config.Monitors)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+	
 	messageCh := make(chan Message)
 	errCh := make(chan error)
 	alertSender := &AlertSender{
@@ -146,7 +157,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	for i, m := range config.Monitors {
+	for i, m := range monitors {
 		id := i + 1
 
 		p := &Probe{
