@@ -27,6 +27,19 @@ func OpenDB(dbfile string) error {
 		return err
 	}
 
+	createResult := `
+	CREATE TABLE IF NOT EXISTS result (
+	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	  created INTEGER,
+	  status TEXT,
+	  reason TEXT,
+	  monitor_id INTEGER,
+	  FOREIGN KEY(monitor_id) REFERENCES monitor(id)
+	);
+	`
+	if _, err := db.Exec(createResult); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -71,4 +84,15 @@ func CreateMonitors(monitors []*Monitor) error {
 	}
 
 	return tx.Commit()
+}
+
+func GetResults(id int) ([]*Result, error) {
+	var results []*Result
+	query := `SELECT * FROM result WHERE monitor_id = ?`
+
+	if err := db.Select(&results, query); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
