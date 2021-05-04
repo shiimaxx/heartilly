@@ -15,13 +15,13 @@ func prepareTestDB(t *testing.T) func() {
 
 	dir, err := os.MkdirTemp("", "")
 	if err != nil {
-		t.Fatal("create tempdir failed: ", err)
+		t.Fatal("create tempdir failed:", err)
 	}
 
 	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
 	err = OpenDB(dbfile)
 	if err != nil {
-		t.Fatal("open db failed: ", err)
+		t.Fatal("open db failed:", err)
 	}
 
 	fixtures, err := testfixtures.New(
@@ -30,11 +30,11 @@ func prepareTestDB(t *testing.T) func() {
 		testfixtures.Directory("testdata/fixtures"),
 	)
 	if err != nil {
-		t.Fatal("create test fixtures failed: ", err)
+		t.Fatal("create test fixtures failed:", err)
 	}
 
 	if err := fixtures.Load(); err != nil {
-		t.Fatal("load fixtures failed: ", err)
+		t.Fatal("load fixtures failed:", err)
 	}
 
 	return func() { os.RemoveAll(dir) }
@@ -43,7 +43,7 @@ func prepareTestDB(t *testing.T) func() {
 func TestOpenDB(t *testing.T) {
 	dir, err := os.MkdirTemp("", "")
 	if err != nil {
-		t.Fatal("create tempdir failed: ", err)
+		t.Fatal("create tempdir failed:", err)
 	}
 	defer os.RemoveAll(dir)
 
@@ -148,22 +148,147 @@ func TestGetResults(t *testing.T) {
 	cleanup := prepareTestDB(t)
 	defer cleanup()
 
-	got, err := GetResults(1)
-
-	assert.Nil(t, err)
-
 	baseTime, err := time.Parse("2006-01-02 15:04:05 +0000", "2006-01-02 15:04:05 +0000")
 	if err != nil {
-		t.Fatal("parse time failed: ", err)
+		t.Fatal("parse time failed:", err)
 	}
 
-	want := []*Result{
-		{ID: 1, Created: baseTime, Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 4, Created: baseTime.Add(1 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 7, Created: baseTime.Add(2 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 10, Created: baseTime.Add(3 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 13, Created: baseTime.Add(4 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
+	cases := []struct {
+		name      string
+		monitorID int
+		want      []*Result
+	}{
+		{
+			name:      "monitorID: 1",
+			monitorID: 1,
+			want: []*Result{
+				{
+					ID:        1,
+					Created:   baseTime,
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 1,
+				},
+				{
+					ID:        4,
+					Created:   baseTime.Add(1 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 1,
+				},
+				{
+					ID:        7,
+					Created:   baseTime.Add(2 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 1,
+				},
+				{
+					ID:        10,
+					Created:   baseTime.Add(3 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 1,
+				},
+				{
+					ID:        13,
+					Created:   baseTime.Add(4 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 1,
+				},
+			},
+		},
+		{
+			name:      "monitorID: 2",
+			monitorID: 2,
+			want: []*Result{
+				{
+					ID:        2,
+					Created:   baseTime.Add(10 * time.Second),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 2,
+				},
+				{
+					ID:        5,
+					Created:   baseTime.Add(10 * time.Second).Add(1 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 2,
+				},
+				{
+					ID:        8,
+					Created:   baseTime.Add(10 * time.Second).Add(2 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 2,
+				},
+				{
+					ID:        11,
+					Created:   baseTime.Add(10 * time.Second).Add(3 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 2,
+				},
+				{
+					ID:        14,
+					Created:   baseTime.Add(10 * time.Second).Add(4 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 2,
+				},
+			},
+		},
+		{
+			name:      "monitorID: 3",
+			monitorID: 3,
+			want: []*Result{
+				{
+					ID:        3,
+					Created:   baseTime.Add(20 * time.Second),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 3,
+				},
+				{
+					ID:        6,
+					Created:   baseTime.Add(20 * time.Second).Add(1 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 3,
+				},
+				{
+					ID:        9,
+					Created:   baseTime.Add(20 * time.Second).Add(2 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 3,
+				},
+				{
+					ID:        12,
+					Created:   baseTime.Add(20 * time.Second).Add(3 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 3,
+				},
+				{
+					ID:        15,
+					Created:   baseTime.Add(20 * time.Second).Add(4 * time.Minute),
+					Status:    "OK",
+					Reason:    "200 OK",
+					MonitorID: 3,
+				},
+			},
+		},
 	}
 
-	assert.Equal(t, want, got)
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, err := GetResults(c.monitorID)
+
+			assert.Nil(t, err)
+			assert.Equal(t, c.want, got)
+		})
+	}
 }

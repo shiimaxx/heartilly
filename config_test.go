@@ -146,22 +146,22 @@ follow = true
 	}
 
 	if err := os.Setenv("TEST_SLACK_TOKEN", "envtoken"); err != nil {
-		t.Fatal("set env failed")
+		t.Fatal("set env failed", err)
 	}
 
 	tmpDir, err := os.MkdirTemp("", "")
 	if err != nil {
-		t.Fatal("create temporary directory failed")
+		t.Fatal("create temporary directory failed", err)
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			f, err := os.CreateTemp(tmpDir, "")
 			if err != nil {
-				t.Fatal("create temporary file failed")
+				t.Fatal("create temporary file failed", err)
 			}
 
 			if err := os.WriteFile(f.Name(), c.config, os.ModeTemporary); err != nil {
-				t.Fatal("write file failed")
+				t.Fatal("write file failed", err)
 			}
 
 			config, err := LoadConfig(f.Name())
