@@ -90,7 +90,7 @@ func GetResults(id int) ([]*Result, error) {
 	var results []*Result
 	query := `SELECT * FROM result WHERE monitor_id = ?`
 
-	if err := db.Select(&results, query); err != nil {
+	if err := db.Select(&results, query, id); err != nil {
 		return nil, err
 	}
 

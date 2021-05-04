@@ -1,0 +1,17 @@
+- id: 1
+  name: "GET /monitor/get"
+  method: "GET"
+  url: "http://example.com/monitor/get"
+  follow: 0
+
+- id: 2 
+  name: "POST /monitor/post"
+  method: "POST"
+  url: "http://example.com/monitor/post"
+  follow: 0
+
+- id: 3 
+  name: "GET /monitor/follow"
+  method: "GET"
+  url: "http://example.com/monitor/follow"
+  follow: 1 
