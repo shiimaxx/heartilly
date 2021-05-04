@@ -5,6 +5,8 @@ services:
       context: .
     depends_on:
       - test_target
+    ports:
+      - "8000:8000"
     volumes:
       - ./_example:/config
       - .:/app
