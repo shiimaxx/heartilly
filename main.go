@@ -40,9 +40,26 @@ func (w *Worker) run(ctx context.Context) {
 		w.Logger.Info(w.ID, w.Probe.Monitor.URL.String(), "check")
 
 		ok, reason, err := w.Probe.Check(ctx)
+
+		result := &Result{
+			Created:   time.Now().UTC(),
+			Reason:    reason,
+			MonitorID: w.Probe.Monitor.ID,
+		}
+
 		if err == nil {
 			if ok && (!w.Status.Is(OK)) {
 				w.Status.Recovery()
+
+				result.Status = w.Status.String()
+				if err := CreateResult(result); err != nil {
+					w.Logger.Error(
+						w.ID,
+						w.Probe.Monitor.URL.String(),
+						fmt.Sprintf("save result failed: %s", err.Error()),
+					)
+				}
+
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
@@ -60,6 +77,16 @@ func (w *Worker) run(ctx context.Context) {
 
 			} else if !ok && (w.Status.Is(OK)) {
 				w.Status.Trigger()
+
+				result.Status = w.Status.String()
+				if err := CreateResult(result); err != nil {
+					w.Logger.Error(
+						w.ID,
+						w.Probe.Monitor.URL.String(),
+						fmt.Sprintf("save result failed: %s", err.Error()),
+					)
+				}
+
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
@@ -78,6 +105,16 @@ func (w *Worker) run(ctx context.Context) {
 		} else {
 			if !w.Status.Is(Unknown) {
 				w.Status.Unknown()
+
+				result.Status = w.Status.String()
+				if err := CreateResult(result); err != nil {
+					w.Logger.Error(
+						w.ID,
+						w.Probe.Monitor.URL.String(),
+						fmt.Sprintf("save result failed: %s", err.Error()),
+					)
+				}
+
 				w.MessageCh <- Message{
 					Text: fmt.Sprintf("%s: %s\n%s - %s",
 						w.Status.String(),
@@ -139,7 +176,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
-	
+
 	messageCh := make(chan Message)
 	errCh := make(chan error)
 	alertSender := &AlertSender{
@@ -180,7 +217,7 @@ func main() {
 	}
 
 	httpSrv := NewHTTPServer()
-	go func(){
+	go func() {
 		if err := httpSrv.Start(":8000"); err != nil {
 			errCh <- err
 		}

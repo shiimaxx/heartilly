@@ -96,3 +96,14 @@ func GetResults(id int) ([]*Result, error) {
 
 	return results, nil
 }
+
+func CreateResult(result *Result) error {
+	query := `INSERT INTO result(created, status, reason, monitor_id) VALUES(?, ?, ?, ?)`
+
+	_, err := db.Exec(query, result.Created, result.Status, result.Reason, result.MonitorID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

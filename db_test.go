@@ -292,3 +292,47 @@ func TestGetResults(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateResult(t *testing.T) {
+	dir, err := os.MkdirTemp("", "")
+	if err != nil {
+		t.Fatal("create tempdir failed:", err)
+	}
+	defer os.RemoveAll(dir)
+
+	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
+	if err = OpenDB(dbfile); err != nil {
+		t.Fatal("open db failed:", err)
+	}
+
+	created, err := time.Parse("2006-01-02 15:04:05 +0000", "2006-01-02 15:04:05 +0000")
+	if err != nil {
+		t.Fatal("parse time failed:", err)
+	}
+
+	result := &Result{
+		Created: created,
+		Status: "OK",
+		Reason: "200 OK",
+		MonitorID: 1,
+	}
+	err = CreateResult(result)
+
+	assert.Nil(t, err)
+
+	want := Result{
+		ID: 1,
+		Created: created,
+		Status: "OK",
+		Reason: "200 OK",
+		MonitorID: 1,
+	}
+	got := Result{}
+
+	if err := db.Get(&got, `SELECT * FROM result`); err != nil {
+		t.Fatal("query failed:", err)
+	}
+
+	assert.Equal(t, want, got)
+
+}
