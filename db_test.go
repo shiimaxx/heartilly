@@ -164,35 +164,35 @@ func TestGetResults(t *testing.T) {
 			want: []*Result{
 				{
 					ID:        1,
-					Created:   baseTime,
+					CheckedAt: baseTime,
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 1,
 				},
 				{
 					ID:        4,
-					Created:   baseTime.Add(1 * time.Minute),
+					CheckedAt: baseTime.Add(1 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 1,
 				},
 				{
 					ID:        7,
-					Created:   baseTime.Add(2 * time.Minute),
+					CheckedAt: baseTime.Add(2 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 1,
 				},
 				{
 					ID:        10,
-					Created:   baseTime.Add(3 * time.Minute),
+					CheckedAt: baseTime.Add(3 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 1,
 				},
 				{
 					ID:        13,
-					Created:   baseTime.Add(4 * time.Minute),
+					CheckedAt: baseTime.Add(4 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 1,
@@ -205,35 +205,35 @@ func TestGetResults(t *testing.T) {
 			want: []*Result{
 				{
 					ID:        2,
-					Created:   baseTime.Add(10 * time.Second),
+					CheckedAt: baseTime.Add(10 * time.Second),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 2,
 				},
 				{
 					ID:        5,
-					Created:   baseTime.Add(10 * time.Second).Add(1 * time.Minute),
+					CheckedAt: baseTime.Add(10 * time.Second).Add(1 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 2,
 				},
 				{
 					ID:        8,
-					Created:   baseTime.Add(10 * time.Second).Add(2 * time.Minute),
+					CheckedAt: baseTime.Add(10 * time.Second).Add(2 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 2,
 				},
 				{
 					ID:        11,
-					Created:   baseTime.Add(10 * time.Second).Add(3 * time.Minute),
+					CheckedAt: baseTime.Add(10 * time.Second).Add(3 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 2,
 				},
 				{
 					ID:        14,
-					Created:   baseTime.Add(10 * time.Second).Add(4 * time.Minute),
+					CheckedAt: baseTime.Add(10 * time.Second).Add(4 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 2,
@@ -246,35 +246,35 @@ func TestGetResults(t *testing.T) {
 			want: []*Result{
 				{
 					ID:        3,
-					Created:   baseTime.Add(20 * time.Second),
+					CheckedAt: baseTime.Add(20 * time.Second),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 3,
 				},
 				{
 					ID:        6,
-					Created:   baseTime.Add(20 * time.Second).Add(1 * time.Minute),
+					CheckedAt: baseTime.Add(20 * time.Second).Add(1 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 3,
 				},
 				{
 					ID:        9,
-					Created:   baseTime.Add(20 * time.Second).Add(2 * time.Minute),
+					CheckedAt: baseTime.Add(20 * time.Second).Add(2 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 3,
 				},
 				{
 					ID:        12,
-					Created:   baseTime.Add(20 * time.Second).Add(3 * time.Minute),
+					CheckedAt: baseTime.Add(20 * time.Second).Add(3 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 3,
 				},
 				{
 					ID:        15,
-					Created:   baseTime.Add(20 * time.Second).Add(4 * time.Minute),
+					CheckedAt: baseTime.Add(20 * time.Second).Add(4 * time.Minute),
 					Status:    "OK",
 					Reason:    "200 OK",
 					MonitorID: 3,
@@ -305,15 +305,15 @@ func TestCreateResult(t *testing.T) {
 		t.Fatal("open db failed:", err)
 	}
 
-	created, err := time.Parse("2006-01-02 15:04:05 +0000", "2006-01-02 15:04:05 +0000")
+	checkedAt, err := time.Parse("2006-01-02 15:04:05 +0000", "2006-01-02 15:04:05 +0000")
 	if err != nil {
 		t.Fatal("parse time failed:", err)
 	}
 
 	result := &Result{
-		Created: created,
-		Status: "OK",
-		Reason: "200 OK",
+		CheckedAt: checkedAt,
+		Status:    "OK",
+		Reason:    "200 OK",
 		MonitorID: 1,
 	}
 	err = CreateResult(result)
@@ -321,10 +321,10 @@ func TestCreateResult(t *testing.T) {
 	assert.Nil(t, err)
 
 	want := Result{
-		ID: 1,
-		Created: created,
-		Status: "OK",
-		Reason: "200 OK",
+		ID:        1,
+		CheckedAt: checkedAt,
+		Status:    "OK",
+		Reason:    "200 OK",
 		MonitorID: 1,
 	}
 	got := Result{}

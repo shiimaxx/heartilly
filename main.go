@@ -42,7 +42,7 @@ func (w *Worker) run(ctx context.Context) {
 		ok, reason, err := w.Probe.Check(ctx)
 
 		result := &Result{
-			Created:   time.Now().UTC(),
+			CheckedAt:   time.Now().UTC(),
 			Reason:    reason,
 			MonitorID: w.Probe.Monitor.ID,
 		}

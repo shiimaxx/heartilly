@@ -30,7 +30,7 @@ func OpenDB(dbfile string) error {
 	createResult := `
 	CREATE TABLE IF NOT EXISTS result (
 	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	  created TIMESTAMP,
+	  checked_at TIMESTAMP,
 	  status TEXT,
 	  reason TEXT,
 	  monitor_id INTEGER,
@@ -98,9 +98,9 @@ func GetResults(id int) ([]*Result, error) {
 }
 
 func CreateResult(result *Result) error {
-	query := `INSERT INTO result(created, status, reason, monitor_id) VALUES(?, ?, ?, ?)`
+	query := `INSERT INTO result(checked_at, status, reason, monitor_id) VALUES(?, ?, ?, ?)`
 
-	_, err := db.Exec(query, result.Created, result.Status, result.Reason, result.MonitorID)
+	_, err := db.Exec(query, result.CheckedAt, result.Status, result.Reason, result.MonitorID)
 	if err != nil {
 		return err
 	}

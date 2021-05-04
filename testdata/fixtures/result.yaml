@@ -1,75 +1,75 @@
 - id: 1
-  created: "2006-01-02 15:04:05 +0000"
+  checked_at: "2006-01-02 15:04:05 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 1
 - id: 2
-  created: "2006-01-02 15:04:15 +0000"
+  checked_at: "2006-01-02 15:04:15 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 2
 - id: 3
-  created: "2006-01-02 15:04:25 +0000"
+  checked_at: "2006-01-02 15:04:25 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 3
 - id: 4 
-  created: "2006-01-02 15:05:05 +0000"
+  checked_at: "2006-01-02 15:05:05 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 1
 - id: 5
-  created: "2006-01-02 15:05:15 +0000"
+  checked_at: "2006-01-02 15:05:15 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 2
 - id: 6
-  created: "2006-01-02 15:05:25 +0000"
+  checked_at: "2006-01-02 15:05:25 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 3
 - id: 7
-  created: "2006-01-02 15:06:05 +0000"
+  checked_at: "2006-01-02 15:06:05 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 1
 - id: 8
-  created: "2006-01-02 15:06:15 +0000"
+  checked_at: "2006-01-02 15:06:15 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 2
 - id: 9
-  created: "2006-01-02 15:06:25 +0000"
+  checked_at: "2006-01-02 15:06:25 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 3
 - id: 10
-  created: "2006-01-02 15:07:05 +0000"
+  checked_at: "2006-01-02 15:07:05 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 1
 - id: 11
-  created: "2006-01-02 15:07:15 +0000"
+  checked_at: "2006-01-02 15:07:15 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 2
 - id: 12
-  created: "2006-01-02 15:07:25 +0000"
+  checked_at: "2006-01-02 15:07:25 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 3
 - id: 13
-  created: "2006-01-02 15:08:05 +0000"
+  checked_at: "2006-01-02 15:08:05 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 1
 - id: 14
-  created: "2006-01-02 15:08:15 +0000"
+  checked_at: "2006-01-02 15:08:15 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 2
 - id: 15
-  created: "2006-01-02 15:08:25 +0000"
+  checked_at: "2006-01-02 15:08:25 +0000"
   status: "OK"
   reason: "200 OK"
   monitor_id: 3
