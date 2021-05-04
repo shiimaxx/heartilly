@@ -9,31 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOpenDB(t *testing.T) {
+func prepareTestDB(t *testing.T) func() {
+	t.Helper()
+
 	dir, err := os.MkdirTemp("", "")
 	if err != nil {
 		t.Fatal("create tempdir failed: ", err)
 	}
-	defer os.RemoveAll(dir)
-
-	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
-	err = OpenDB(dbfile)
-
-	assert.Nil(t, err)
-
-	_, err = db.Queryx(`SELECT * FROM sqlite_master WHERE name = "monitor"`)
-	assert.Nil(t, err)
-
-	_, err = db.Queryx(`SELECT * FROM sqlite_master WHERE name = "result"`)
-	assert.Nil(t, err)
-}
-
-func TestGetMonitors(t *testing.T) {
-	dir, err := os.MkdirTemp("", "")
-	if err != nil {
-		t.Fatal("create tempdir failed: ", err)
-	}
-	defer os.RemoveAll(dir)
 
 	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
 	err = OpenDB(dbfile)
@@ -54,10 +36,35 @@ func TestGetMonitors(t *testing.T) {
 		t.Fatal("load fixtures failed: ", err)
 	}
 
-	got, err := GetMonitors()
+	return func() { os.RemoveAll(dir) }
+}
+
+func TestOpenDB(t *testing.T) {
+	dir, err := os.MkdirTemp("", "")
 	if err != nil {
-		t.Fatal("get monitors failed: ", err)
+		t.Fatal("create tempdir failed: ", err)
 	}
+	defer os.RemoveAll(dir)
+
+	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
+	err = OpenDB(dbfile)
+
+	assert.Nil(t, err)
+
+	_, err = db.Queryx(`SELECT * FROM sqlite_master WHERE name = "monitor"`)
+	assert.Nil(t, err)
+
+	_, err = db.Queryx(`SELECT * FROM sqlite_master WHERE name = "result"`)
+	assert.Nil(t, err)
+}
+
+func TestGetMonitors(t *testing.T) {
+	cleanup := prepareTestDB(t)
+	defer cleanup()
+
+	got, err := GetMonitors()
+
+	assert.Nil(t, err)
 
 	want := []*Monitor{
 		{
@@ -87,30 +94,8 @@ func TestGetMonitors(t *testing.T) {
 }
 
 func TestGetMonitorByName(t *testing.T) {
-	dir, err := os.MkdirTemp("", "")
-	if err != nil {
-		t.Fatal("create tempdir failed: ", err)
-	}
-	defer os.RemoveAll(dir)
-
-	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
-	err = OpenDB(dbfile)
-	if err != nil {
-		t.Fatal("open db failed: ", err)
-	}
-
-	fixtures, err := testfixtures.New(
-		testfixtures.Database(db.DB),
-		testfixtures.Dialect("sqlite"),
-		testfixtures.Directory("testdata/fixtures"),
-	)
-	if err != nil {
-		t.Fatal("create test fixtures failed: ", err)
-	}
-
-	if err := fixtures.Load(); err != nil {
-		t.Fatal("load fixtures failed: ", err)
-	}
+	cleanup := prepareTestDB(t)
+	defer cleanup()
 
 	cases := []struct {
 		name string
@@ -151,45 +136,20 @@ func TestGetMonitorByName(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got, err := GetMonitorByName(c.name)
-			if err != nil {
-				t.Fatal("get monitors failed: ", err)
-			}
 
+			assert.Nil(t, err)
 			assert.Equal(t, c.want, got)
 		})
 	}
 }
 
 func TestGetResults(t *testing.T) {
-	dir, err := os.MkdirTemp("", "")
-	if err != nil {
-		t.Fatal("create tempdir failed: ", err)
-	}
-	defer os.RemoveAll(dir)
-
-	dbfile := fmt.Sprintf("%s/heartilly_test.db", dir)
-	err = OpenDB(dbfile)
-	if err != nil {
-		t.Fatal("open db failed: ", err)
-	}
-
-	fixtures, err := testfixtures.New(
-		testfixtures.Database(db.DB),
-		testfixtures.Dialect("sqlite"),
-		testfixtures.Directory("testdata/fixtures"),
-	)
-	if err != nil {
-		t.Fatal("create test fixtures failed: ", err)
-	}
-
-	if err := fixtures.Load(); err != nil {
-		t.Fatal("load fixtures failed: ", err)
-	}
+	cleanup := prepareTestDB(t)
+	defer cleanup()
 
 	got, err := GetResults(1)
-	if err != nil {
-		t.Fatal("get results failed: ", err)
-	}
+
+	assert.Nil(t, err)
 
 	want := []*Result{
 		{ID: 1, Created: 1136239445, Status: "OK", Reason: "200 OK", MonitorID: 1},
