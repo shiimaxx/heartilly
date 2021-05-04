@@ -30,7 +30,7 @@ func OpenDB(dbfile string) error {
 	createResult := `
 	CREATE TABLE IF NOT EXISTS result (
 	  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	  created INTEGER,
+	  created TIMESTAMP,
 	  status TEXT,
 	  reason TEXT,
 	  monitor_id INTEGER,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/stretchr/testify/assert"
@@ -151,12 +152,17 @@ func TestGetResults(t *testing.T) {
 
 	assert.Nil(t, err)
 
+	baseTime, err := time.Parse("2006-01-02 15:04:05 +0000", "2006-01-02 15:04:05 +0000")
+	if err != nil {
+		t.Fatal("parse time failed: ", err)
+	}
+
 	want := []*Result{
-		{ID: 1, Created: 1136239445, Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 4, Created: 1136239505, Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 7, Created: 1136239565, Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 10, Created: 1136239625, Status: "OK", Reason: "200 OK", MonitorID: 1},
-		{ID: 13, Created: 1136239685, Status: "OK", Reason: "200 OK", MonitorID: 1},
+		{ID: 1, Created: baseTime, Status: "OK", Reason: "200 OK", MonitorID: 1},
+		{ID: 4, Created: baseTime.Add(1 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
+		{ID: 7, Created: baseTime.Add(2 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
+		{ID: 10, Created: baseTime.Add(3 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
+		{ID: 13, Created: baseTime.Add(4 * time.Minute), Status: "OK", Reason: "200 OK", MonitorID: 1},
 	}
 
 	assert.Equal(t, want, got)
