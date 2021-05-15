@@ -63,7 +63,7 @@ func TestGetMonitors(t *testing.T) {
 	cleanup := prepareTestDB(t)
 	defer cleanup()
 
-	got, err := GetMonitors()
+	got, err := GetAllMonitors()
 
 	assert.Nil(t, err)
 
@@ -285,7 +285,7 @@ func TestGetResults(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := GetResults(c.monitorID)
+			got, err := GetResultsByMonitorID(c.monitorID)
 
 			assert.Nil(t, err)
 			assert.Equal(t, c.want, got)

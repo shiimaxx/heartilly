@@ -43,7 +43,7 @@ func OpenDB(dbfile string) error {
 	return nil
 }
 
-func GetMonitors() ([]*Monitor, error) {
+func GetAllMonitors() ([]*Monitor, error) {
 	var monitors []*Monitor
 
 	query := `SELECT * FROM monitor`
@@ -86,7 +86,7 @@ func CreateMonitors(monitors []*Monitor) error {
 	return tx.Commit()
 }
 
-func GetResults(id int) ([]*Result, error) {
+func GetResultsByMonitorID(id int) ([]*Result, error) {
 	var results []*Result
 	query := `SELECT * FROM result WHERE monitor_id = ?`
 

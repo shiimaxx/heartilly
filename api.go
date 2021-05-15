@@ -17,14 +17,14 @@ func NewHTTPServer() *HTTPServer {
 	e.Use(middleware.Recover())
 
 	apiv1 := e.Group("/api/v1")
-	apiv1.GET("/monitors", ListMonitors)
-	apiv1.GET("/results/:id", ListResults)
+	apiv1.GET("/monitors", GetMonitors)
+	apiv1.GET("/results/:id", GetResults)
 
 	return &HTTPServer{e}
 }
 
-func ListMonitors(c echo.Context) error {
-	m, err := GetMonitors()
+func GetMonitors(c echo.Context) error {
+	m, err := GetAllMonitors()
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func ListMonitors(c echo.Context) error {
 	return c.JSON(http.StatusOK, m) 
 }
 
-func ListResults(c echo.Context) error {
+func GetResults(c echo.Context) error {
 	id := c.Param("id")
 
 	i, err := strconv.ParseInt(id, 10, 0)
@@ -40,7 +40,7 @@ func ListResults(c echo.Context) error {
 		return err
 	}
 
-	r, err := GetResults(int(i))
+	r, err := GetResultsByMonitorID(int(i))
 	if err != nil {
 		return err
 	}

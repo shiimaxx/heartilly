@@ -32,7 +32,7 @@ func InitSyncMonitor(monitors []*Monitor) ([]*Monitor, error) {
 		return nil, err
 	}
 
-	return GetMonitors()
+	return GetAllMonitors()
 }
 
 type URL url.URL
